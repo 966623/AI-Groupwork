@@ -62,24 +62,25 @@ def allDiff( constraints, v ):
             if ( i != j ) :
                 constraints.append( BinaryConstraint( v[ i ], v[ j ], fn ) )
 
+def setUpCrypt(variables, constraints, words, letters, op):
+    letters = []
+    words = []
+    domain = [0,1,2,3,4,5,6,7,8,9]
+    letters = variables
+
+    for l in letters:
+        variables[l] = ConstraintVar(domain, l)
+
+    allCons = []
+    for k in variables.keys():
+        allCons.append( variables[k] )
+    #add the allDiff constraints among those row elements
+    allDiff( constraints, allCons )
+
 def setUpKenKen( variables, constraints, size ):
-    # This setup is applicable to KenKen and Sudoku. For this example, it is a 3x3 board with each domain initialized to {1,2,3}
-    # The VarNames list can then be used as an index or key into the dictionary, ex. variables['A1'] will return the ConstraintVar object
-
-    # Note that I could accomplish the same by hard coding the variables, for example ...
-    # A1 = ConstraintVar( [1,2,3],'A1' )
-    # A2 = ConstraintVar( [1,2,3],'A2' ) ...
-    # constraints.append( BinaryConstraint( A1, A2, lambda x,y: x != y ) )
-    # constraints.append( BinaryConstraint( A2, A1, lambda x,y: x != y ) ) ...
-    #   but you can see how tedious this would be.
-    if size <= 1:
-        print( "Unsolvable KenKen")
-        sys.exit()
-
     rows = []
     cols = []
     doma = []
-
     for c in ( chr( i ) for i in range( 65, 65 + size ) ):
         rows.append( c )
 
@@ -242,15 +243,16 @@ def AC3():
     # create a dictionary of ConstraintVars keyed by names in VarNames.
     variables = dict()
     constraints = []
-    size, cons = readKenKen()
+    cons = []
+    op, words, letters = readCrypt()
 
-    setUpKenKen( variables, constraints, size )
+    setUpCrypt(variables, constraints, words, letters, op)
     print("initial domains")
     printDomains( variables )
 
     transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
-
+    """
     # Initialize the queue by putting all the constraint variables in the queue
     for
 
@@ -259,11 +261,11 @@ def AC3():
         if Revise( constr ):
             if
 
+"""
 
 
-
-AC3()
-readCrypt()
+#AC3()
+readVars = readCrypt()
 
 
 

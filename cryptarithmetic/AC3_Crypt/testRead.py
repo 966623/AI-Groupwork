@@ -110,7 +110,7 @@ def readCrypt():
 
     # read in the file with constraints for KenKen puzzles (1 line per puzzle)
     lines = open('testCrypt.txt').readlines()
-    testLine = 4 # test this line in file
+    testLine = 0 # test this line in file
     l = lines[testLine]
     #remove white space
     l=re.sub('[ ]','',l)
@@ -130,11 +130,13 @@ def readCrypt():
     vars = []
     # separate values
     words = re.findall('\w+',l)
+    print(words)
     for w in words:
         letters = re.findall('\w',w)
         for letter in letters:
             if letter not in vars: vars.append(letter)
     print('vars ',vars)
+    return op,words,vars
 
 def readFutoshiki():
 
