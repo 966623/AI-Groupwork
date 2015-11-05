@@ -4,47 +4,54 @@ import random
 import copy
 
 class MacCrypt:
+    # Initialize data
     def __init__(self, op, words, letters):
         self.op = op
         self.words = words
         self.letters = letters
 
+    # Sets up and starts the solver
     def solve(self):
+        # Check if solvable
         if len(self.letters) > 10:
             print("Unsolvable, too many letters.")
             return 0
+
+        # Setup variables dictionary, -1 for unassigned letters
         variables = dict()
-        domain = [i for i in range(10)]
         for l in self.letters:
             variables[l] = -1
 
-        return self.solveRecurse(variables, domain)
+        return self.solveRecurse(variables, [])
 
-    def solveRecurse(self, variables, domain):
+    # Recursive part of the solver
+    def solveRecurse(self, variables, searchedDomain):
+        # Check if solved
         finished = True
         emptyLetter = " "
         for k in variables.keys():
             if variables[k] == -1:
                 finished = False
                 emptyLetter = k
-
+        # If solved, return
         if finished:
             solved = self.testSumSolution(variables)
             if solved:
                 return variables
             else:
                 return None
+        # Else keep searching
         else:
-            for i in domain:
-                variables[emptyLetter] = i
-                newDomain = copy.copy(domain)
-                newDomain.remove(i)
-                newVariables = copy.deepcopy(variables)
-                print(newDomain)
-                print(variables)
-                solution = self.solveRecurse(newVariables, newDomain)
-                if solution != None:
-                    return solution
+            # Try each digit
+            for i in range(10):
+                if i not in searchedDomain:
+                    variables[emptyLetter] = i
+                    searchedDomain.append(i)
+                    solution = self.solveRecurse(variables, searchedDomain)
+                    if solution != None:
+                        return solution
+                    searchedDomain.remove(i)
+        variables[emptyLetter] = -1
         return None
 
 

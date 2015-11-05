@@ -110,7 +110,7 @@ def readCrypt():
 
     # read in the file with constraints for KenKen puzzles (1 line per puzzle)
     lines = open('testCrypt.txt').readlines()
-    testLine = 0 # test this line in file
+    testLine = 6 # test this line in file
     l = lines[testLine]
     #remove white space
     l=re.sub('[ ]','',l)
