@@ -411,22 +411,22 @@ def transferConstraint( cons, constraints, variables ):
             tc = TernaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 2 ] ], c.fn )
             constraints.append( tc )
 
-def AC3():
+
+def setupAC3(constraints, variables):
     # create a dictionary of ConstraintVars keyed by names in VarNames.
-    variables = dict()
-    constraints = []
-    cons = []
     op, words, letters = readCrypt()
 
-    setUpCrypt(variables, cons, words, letters, op)
+    setUpCrypt(variables, constraints, words, letters, op)
     print("initial domains")
     printDomains( variables )
 
+
+def AC3(constraints, variables):
     #transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
 
     # Initialize the queue by putting all the constraint variables in the queue
-    for c in cons:
+    for c in constraints:
         que.put(c)
 
     while not( que.empty() ):
@@ -434,15 +434,25 @@ def AC3():
         if Revise( constr ):
             que.put(constr)
 
-    print("\n Final Domains")
+    print("\nFinal Domains")
     printDomains( variables )
 
+    for k in variables.keys():
+        if len(variables[k].domain) == 0:
+            return -1
+        elif len(variables[k].domain) > 1:
+            return 0
+    return 1
 
 
+"""
+const = []
+vars = dict()
+setupAC3(const, vars)
+AC3(const, vars)
 
-AC3()
 
-
+"""
 
 
 
