@@ -228,8 +228,8 @@ def readCrossMath():
         print('op var answer fn(16,16,4)',op2,' ',var3,' ',answer,' ',fn(16,16,4))
 
 if __name__ == "__main__":
-    readKenKen()
-    #readCrypt()
+    #readKenKen()
+    readCrypt()
     #readFutoshiki()
     #readCrossMath()
     
