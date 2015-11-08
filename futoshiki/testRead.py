@@ -37,11 +37,11 @@ class Constraint:
         else:
             print('num vars not right')
 
-def readFutoshiki():
+def readFutoshiki(lineno):
 
-    # read in the file with constraints for KenKen puzzles (1 line per puzzle)
+    # read in the file with constraints for puzzle (1 line per puzzle)
     lines = open('testFutoshiki.txt').readlines()
-    testLine = 0 # test this line in file
+    testLine = lineno # test this line in file
     l = lines[testLine]
     #remove white space
     l = re.sub('[ ]','',l)
@@ -82,4 +82,4 @@ def readFutoshiki():
             print('var,val,fn(1) ',var,'==',value,fn(1))
 
 if __name__ == "__main__":
-    readFutoshiki()
+    readFutoshiki(0)
