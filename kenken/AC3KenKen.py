@@ -1,4 +1,4 @@
-# Sihan Chen
+   # Sihan Chen
 # Project Part 2 : Comparison of CSP and Search Algorithms
 # Problem : KenKen
 
@@ -7,6 +7,7 @@ import functools
 import queue
 from functools import reduce
 from testRead import *
+
 # The primary problem set-up consists of "variables" and "constraints":
 #   "variables" are a dictionary of constraint variables (of type ConstraintVar), example variables['A1']
 #   "constraints" are a set of binary constraints (of type BinaryConstraint)
@@ -27,8 +28,8 @@ class UnaryConstraint:
     # v1 is of class ConstraintVar
     # fn is the lambda expression for the constraint
     # instantiation example: UnaryConstraint( variables['A1'], lambda x: x <= 2 )
-    def __init__( self, v, fn ):
-        self.var = v
+    def __init__( self, v1, fn ):
+        self.var1 = v
         self.func = fn
 
 class BinaryConstraint:
@@ -141,13 +142,13 @@ def setUpNeighbor( varname, variables, size ):
         for i in range( 0, size ):
             for k in range( 0, size ):
                 if k != i:
-                    variables[ varname[ i ][ j ] ].neighbors.append( variables[ varname[ k ][ j ] ] 
+                    variables[ varname[ i ][ j ] ].neighbors.append( variables[ varname[ k ][ j ] ] )
+                                                    
                      
 def Revise( cv ):
     revised = False 
-    domain_list = []
     if ( type( cv ) == TernaryConstraint ):
-                                                                     
+                                                                    
         if not ( cv.var2 in cv.var1.neighbors ):
             cv.var1.neighbors.append( cv.var2 )
         if not ( cv.var3 in cv.var1.neighbors ):
@@ -160,25 +161,30 @@ def Revise( cv ):
             cv.var1.neighbors.append( cv.var1 )
         if not ( cv.var2 in cv.var3.neighbors ):
             cv.var1.neighbors.append( cv.var2 )
-                                                                                 
+                                                                                                                                                      
         dom1 = list( cv.var1.domain )
         dom2 = list( cv.var2.domain ) 
         dom3 = list( cv.var3.domain )
         # for each value in the domain of variable 1
         for x in dom1:
-            check = 0
+            check = False
             # for each value in the domain of variable 2
             for y in dom2:
-                # for each value in the domain of variable 3
-                for z in dom3:
-                # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x      
-                   if ( cv.func( x, y, z ) == False and cv.func( x, z, y ) == False and cv.func( y, x, z ) == False and cv.func( y, z, x ) == False
-                        and cv.func( z, x, y ) == False and cv.func( z, y, x ) == False ):
-                       check += 1
-                   if ( check == len( dom2 ) * len( dom3 ) ):
-                       cv.var1.domain.remove( x )            
-                       revised = True  
-             
+                if y != x:
+                    # for each value in the domain of variable 3
+                    for z in dom3:
+                        if z != y and z != x:    
+                        # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x
+                            if not ( cv.func( x, y, z ) == False and cv.func( x, z, y ) == False and cv.func( y, x, z ) == False and cv.func( y, z, x ) == False\
+                                and cv.func( z, x, y ) == False and cv.func( z, y, x ) == False ):
+                                    check = True
+                                    break
+            if ( check == False ):
+                cv.var1.domain.remove( x )
+                revised = True                  
+                
+                    
+                    
     elif ( type( cv ) == BinaryConstraint ):
         if not ( cv.var2 in cv.var1.neighbors ):
             cv.var1.neighbors.append( cv.var2 )
@@ -189,53 +195,59 @@ def Revise( cv ):
         dom2 = list( cv.var2.domain )
         # for each value in the domain of variable 1
         for x in dom1:
-            check = 0
+            check = False
             # for each value in the domain of variable 2
-            for y in dom2:            
-            # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x      
-               if ( cv.func( x, y ) == False and cv.func( y, x ) == False ):
-                   check += 1
-               if ( check == len( dom2 ) ):
-                   cv.var1.domain.remove( x )            
-                   revised = True
+            for y in dom2:
+                if y != x:
+                # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x      
+                    if not ( cv.func( x, y ) == False and cv.func( y, x ) == False ):
+                        check = True
+                        break     
+            if ( check == False ):
+                cv.var1.domain.remove( x )
+                revised = True        
+               
 
     elif ( type( cv ) == UnaryConstrain ):                                                                              
-        dom = list( cv.var.domain )
+        dom = list( cv.var1.domain )
         # for each value in the domain of variable
         for x in dom:
             if ( cv.func( x ) == False ):
-                cv.var.domain.remove( x )            
+                cv.var1.domain.remove( x )
                 revised = True
         
     return revised
-                                                                     
-def nodeConsistent( uc ):
-    domain = list(uc.var.domain)
-    for x in domain:
-        if ( False == uc.func(x) ):
-            uc.var.domain.remove(x)
 
-def printDomains( vars, n=3 ):
+
+def printDomains( vars, size ):
     count = 0
     for k in sorted(vars.keys()):
         print( k,'{',vars[k].domain,'}, ',end="" )
         count = count+1
-        if ( 0 == count % n ):
+        if ( 0 == count % size ):
             print(' ')
+                                                                    
 
 def transferConstraint( cons, constraints, variables ):
     for c in cons:
         num_var = c.nvars
         if num_var == 1:
             uc = UnaryConstraint( variables[ c.vlist[ 0 ] ], c.fn )
+            print(uc.name)
             constraints.append( uc )
         elif num_var == 2:
-            bc = BinaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], c.fn )
-            constraints.append( bc )
+            bc1 = BinaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], c.fn )
+            constraints.append( bc1 )
+            bc2 = BinaryConstraint( variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 0 ] ], c.fn )
+            constraints.append( bc2 )
         elif num_var == 3:
-            tc = TernaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 2 ] ], c.fn )
-            constraints.append( tc )
-            
+            tc1 = TernaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 2 ] ], c.fn )
+            constraints.append( tc1 )
+            tc2 = TernaryConstraint( variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 2 ] ], c.fn )
+            constraints.append( tc2 )
+            tc3 = TernaryConstraint( variables[ c.vlist[ 2 ] ], variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], c.fn )
+            constraints.append( tc3 )
+
 def AC3():
     # create a dictionary of ConstraintVars keyed by names in VarNames.
     variables = dict()
@@ -243,25 +255,130 @@ def AC3():
     size, cons = readKenKen()
     
     setUpKenKen( variables, constraints, size )
-    print("initial domains")
-    printDomains( variables )
+
+    '''for i in range(0,96):
+        print(".........................")
+        print (constraints[i].var1.name)
+        print ("neighbor")
+        
+        for j in constraints[i].var1.neighbors:
+            print (j.name)
+        print("========================")    
+        print (constraints[i].var2.name)
+        print ("neighbor")
+        for j in constraints[i].var2.neighbors:
+            print (j.name)
+        #print (constraints[i].func)
+    '''
+    #print("initial domains")
+    #printDomains( variables , size )
 
     transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
 
     # Initialize the queue by putting all the constraint variables in the queue 
-    for 
+    for constraint in constraints:
+        que.put( constraint )
 
+          
     while not( que.empty() ):
         constr = que.get()
+        '''print("get")
+        if type( constr ) == BinaryConstraint:
+            print("get =========")
+            print ( " binary var1  " )
+            print( constr. var1.name)
+            print ( " binary var2  " )
+            print( constr. var2.name)
+            print("======================")
+        if type( constr ) == TernaryConstraint:
+            print("get =========")
+            print ( " binary var1  " )
+            print( constr. var1.name)
+            print ( " binary var2  " )
+            print( constr. var2.name)
+            print ( " binary var3  " )
+            print( constr. var3.name)
+            print("======================")'''
         if Revise( constr ):
-            if 
-        
-            
+            if constr.var1.domain == []:
+                return False
+            '''if type( constr ) == BinaryConstraint:
+                    print("revise  =========")
+                    print ( " binary var1  " )
+                    print( constr. var1.name)
+                    print ( " binary var2  " )
+                    print( constr. var2.name)
+                    print("======================")
+            if type( constr ) == TernaryConstraint:
+                    print("revise =========")
+                    print ( " binary var1  " )
+                    print( constr. var1.name)
+                    print ( " binary var2  " )
+                    print( constr. var2.name)
+                    print ( " binary var3  " )
+                    print( constr. var3.name)
+                    print("======================")'''
+            if type( constr ) == BinaryConstraint:
+                for constraint in constraints:
+                    if type( constraint ) == BinaryConstraint and constraint.var1 != constr.var1 and constraint.var1 != constr.var2 and constraint.var2 == constr.var1:
+                        '''print("put =========")
+                        print ( " binary var1  " )
+                        print( constraint. var1.name)
+                        print ( " binary var2  " )
+                        print( constraint. var2.name)
+                        print("======================")'''
+                        que.put( constraint )
+                    if type( constraint ) == TernaryConstraint and constraint.var1 != constr.var1 and ( constraint.var2 == constr.var1 or constraint.var3 == constr.var1 ):
+                        '''print("get =========")
+                        print ( " binary var1  " )
+                        print( constraint. var1.name)
+                        print ( " binary var2  " )
+                        print( constraint. var2.name)
+                        print ( " binary var3  " )
+                        print( constraint. var3.name)
+                        print("======================")'''
+                        
+                        que.put( constraint )                        
+            elif type( constr ) == TernaryConstraint:
+                for constraint in constraints:                 
+                    if type( constraint ) == BinaryConstraint and constraint.var1 != constr.var1 and constraint.var2 == constr.var1:
+                        '''print("put =========")
+                        print ( " binary var1  " )
+                        print( constraint. var1.name)
+                        print ( " binary var2  " )
+                        print( constraint. var2.name)
+                        print("======================")'''
+                        que.put( constraint )    
+                    if type( constraint ) == TernaryConstraint and constraint.var1 != constr.var1: 
+                        if constraint.var1 != constr.var2 and constraint.var1 != constr.var3 and ( constraint.var2 == constr.var1 or constraint.var3 == constr.var1 ):
+                            '''print("get =========")
+                            print ( " binary var1  " )
+                            print( constraint. var1.name)
+                            print ( " binary var2  " )
+                            print( constraint. var2.name)
+                            print ( " binary var3  " )
+                            print( constraint. var3.name)
+                            print("======================")'''
+                            que.put( constraint )
+                        if ( constraint.var1 == constr.var2 and constraint.var2 == constr.var1 and constraint.var3 != constr.var3 ) or\
+                           ( constraint.var1 == constr.var2 and constraint.var2 == constr.var3 and constraint.var3 != constr.var1 ) or\
+                           ( constraint.var1 == constr.var3 and constraint.var2 == constr.var1 and constraint.var3 != constr.var2 ) or\
+                           ( constraint.var1 == constr.var3 and constraint.var2 == constr.var2 and constraint.var3 != constr.var1 ):
+                            '''print("get =========")
+                            print ( " binary var1  " )
+                            print( constraint. var1.name)
+                            print ( " binary var2  " )
+                            print( constraint. var2.name)
+                            print ( " binary var3  " )
+                            print( constraint. var3.name)
+                            print("======================")
+                            que.put( constraint )'''
+                            
+    printDomains( variables, size )
     
-    
+
 AC3()
-readKenKen()    
 
     
     

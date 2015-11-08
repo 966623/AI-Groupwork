@@ -57,7 +57,7 @@ def readKenKen():
 
     # size of puzzle is first number on the line
     n = eval(re.findall('^\d+',l)[0])
-    print('size ',n)
+    #print('size ',n)
     
     # create a list of constraints (as strings).
     # order is [answer,operator,var+], which can have 1,2, or 3 vars
@@ -67,24 +67,24 @@ def readKenKen():
     c2 = re.findall('[[]\w+,\W+,\w+,\w+[]]',l)
     c3 = re.findall('[[]\w+,\W+,\w+,\w+,\w+[]]',l)
     cs = c1+c2+c3
-    print('cs ',cs)
+    #print('cs ',cs)
     
     # for each of the constraints
     for c in cs:
         # remove white space and brackets, then split constraint into answer,op,var
         c=re.sub('[[\] ]','',c)
         c=re.split(',',c)
-        print('c ',c)
+        #print('c ',c)
 
         # makeVars if not already in existence
         for v in c[2:len(c)]:
-            print('v ',v)
+            #print('v ',v)
             if v not in vars:
                 vars[v] = MakeVar(v)
         op = c[1]
         answer = c[0]
         # make a constraint
-        print(c[2:len(c)])
+        #print(c[2:len(c)])
         Cons.append(Constraint( c[2:len(c)], op, answer ))
 
     return n,Cons
