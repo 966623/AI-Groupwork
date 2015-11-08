@@ -63,10 +63,7 @@ def allDiff( constraints, v ):
                 constraints.append( BinaryConstraint( v[ i ], v[ j ], fn ) )
 
 def setUpCrypt(variables, constraints, words, letters, op):
-    letters = []
-    words = []
-    domain = [0,1,2,3,4,5,6,7,8,9]
-    letters = variables
+    domain = [i for i in range(10)]
 
     for l in letters:
         variables[l] = ConstraintVar(domain, l)
@@ -74,8 +71,184 @@ def setUpCrypt(variables, constraints, words, letters, op):
     allCons = []
     for k in variables.keys():
         allCons.append( variables[k] )
-    #add the allDiff constraints among those row elements
+
+    # Constrain all letters to different digits
     allDiff( constraints, allCons )
+
+    # Set max word length, constrain all first letters to not 0
+    maxWordLength = 0
+    maxVarLength = 0
+    for w in range(len(words)):
+        allCons.append([0])
+        constraints.append(UnaryConstraint( variables[words[w][0]], lambda x: x != 0 ))
+
+        if len(words[w]) > maxWordLength:
+            maxWordLength = len(words[w])
+        if len(words[w]) > maxVarLength and w < len(words)-1:
+            maxVarLength = len(words[w])
+
+    # Constrain columns to add up
+    for i in range(maxWordLength):
+        varLetters = {}
+
+        # Count number of times each letter appears in column
+        for j in range(len(words)-1):
+            index = len(words[j]) - i - 1
+            if i < len(words[j]):
+                vlKeys = list(varLetters.keys())
+                if (vlKeys.count(words[j][index]) == 0):
+                    varLetters[words[j][index]] = 1
+                else:
+                    varLetters[words[j][index]] += 1
+
+        # Take the letters in solution to account
+        j = len(words)-1
+        index = len(words[j]) - i - 1
+        if i < len(words[j]):
+            vlKeys = list(varLetters.keys())
+            if (vlKeys.count(words[j][index]) == 0):
+                if len(vlKeys) == 0:
+                    constraints.append(UnaryConstraint( variables[words[j][index]], lambda x: x < len(words)-1 ))
+                else:
+                    varLetters[words[j][index]] = -1
+            else:
+                varLetters[words[j][index]] -= 1
+        print(varLetters)
+
+        vlKeys = list(varLetters.keys())
+
+        if maxVarLength - i - 1 == 0:
+            if maxVarLength == maxWordLength:
+
+                if len(vlKeys) == 3:
+                    constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
+                                        lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[2]]:
+                                                      (x*xv + y*yv + z*zv) == 0 or
+                                                      (x*xv + y*yv + z*zv) == -(len(words)-2)))
+                    constraints.append(TernaryConstraint( variables[vlKeys[2]], variables[vlKeys[1]], variables[vlKeys[0]],
+                                        lambda x,y,z,xv=varLetters[vlKeys[2]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[0]]:
+                                                      (x*xv + y*yv + z*zv) == 0 or
+                                                      (x*xv + y*yv + z*zv) == -(len(words)-2)))
+                    constraints.append(TernaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]], variables[vlKeys[2]],
+                                        lambda x,y,z,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]],zv=varLetters[vlKeys[2]]:
+                                                      (x*xv + y*yv + z*zv) == 0 or
+                                                      (x*xv + y*yv + z*zv) == -(len(words)-2)))
+                elif len(vlKeys) == 2:
+                    constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
+                                        lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]]:
+                                                      (x*xv + y*yv) == 0 or
+                                                      (x*xv + y*yv) == -(len(words)-2)))
+                    constraints.append(BinaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]],
+                                        lambda x,y,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]]:
+                                                      (x*xv + y*yv) == 0 or
+                                                      (x*xv + y*yv) == -(len(words)-2)))
+                elif len(vlKeys) == 1:
+                    constraints.append(UnaryConstraint( variables[vlKeys[0]],
+                                        lambda x,xv=varLetters[vlKeys[0]]:
+                                                      (x*xv) == 0 or
+                                                      (x*xv) == -(len(words)-2)))
+
+            else:
+                if len(vlKeys) == 3:
+                    constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
+                                        lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[2]]:
+                                                      ((x*xv + y*yv)%10 == 0 or
+                                                      (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                      (x*xv + y*yv)%10 == 10-(len(words)-2)) and
+                                                      (x*xv + y*yv + z*zv)    >= 9))
+                    constraints.append(TernaryConstraint( variables[vlKeys[2]], variables[vlKeys[1]], variables[vlKeys[0]],
+                                        lambda x,y,z,xv=varLetters[vlKeys[2]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[0]]:
+                                                      ((x*xv + y*yv)%10 == 0 or
+                                                      (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                      (x*xv + y*yv)%10 == 10-(len(words)-2)) and
+                                                      (x*xv + y*yv + z*zv)    >= 9))
+                    constraints.append(TernaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]], variables[vlKeys[2]],
+                                        lambda x,y,z,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]],zv=varLetters[vlKeys[2]]:
+                                                      ((x*xv + y*yv)%10 == 0 or
+                                                      (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                      (x*xv + y*yv)%10 == 10-(len(words)-2)) and
+                                                      (x*xv + y*yv + z*zv)    >= 9))
+                elif len(vlKeys) == 2:
+                    constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
+                                        lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]]:
+                                                      ((x*xv + y*yv)%10 == 0 or
+                                                      (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                      (x*xv + y*yv)%10 == 10-(len(words)-2)) and
+                                                      (x*xv + y*yv)/9    >= 1))
+                    constraints.append(BinaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]],
+                                        lambda x,y,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]]:
+                                                      ((x*xv + y*yv)%10 == 0 or
+                                                      (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                      (x*xv + y*yv)%10 == 10-(len(words)-2)) and
+                                                      (x*xv + y*yv)/9    >= 1))
+                elif len(vlKeys) == 1:
+                    constraints.append(UnaryConstraint( variables[vlKeys[0]],
+                                        lambda x,xv=varLetters[vlKeys[0]]:
+                                                      ((x*xv)%10 == 0 or
+                                                      (x*xv)%10 == -(len(words)-2) or
+                                                      (x*xv)%10 == 10-(len(words)-2)) and
+                                                      (x*xv)/9    >= 1))
+        elif i == 0:
+            if len(vlKeys) == 3:
+                constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
+                                    lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[2]]:
+                                                  (x*xv + y*yv + z*zv)%10 == 0))
+                constraints.append(TernaryConstraint( variables[vlKeys[2]], variables[vlKeys[1]], variables[vlKeys[0]],
+                                    lambda x,y,z,xv=varLetters[vlKeys[2]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[0]]:
+                                                  (x*xv + y*yv + z*zv)%10 == 0))
+                constraints.append(TernaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]], variables[vlKeys[2]],
+                                    lambda x,y,z,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]],zv=varLetters[vlKeys[2]]:
+                                                  (x*xv + y*yv + z*zv)%10 == 0))
+            elif len(vlKeys) == 2:
+                constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
+                                    lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]]:
+                                                  (x*xv + y*yv)%10 == 0))
+                constraints.append(BinaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]],
+                                    lambda x,y,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]]:
+                                                  (x*xv + y*yv)%10 == 0))
+            elif len(vlKeys) == 1:
+                constraints.append(UnaryConstraint( variables[vlKeys[0]],
+                                    lambda x,xv=varLetters[vlKeys[0]]:
+                                                  (x*xv)%10 == 0))
+        else:
+            if len(vlKeys) == 3:
+                constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
+                                    lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[2]]:
+                                                  (x*xv + y*yv + z*zv)%10 == 0 or
+                                                  (x*xv + y*yv + z*zv)%10 == -(len(words)-2) or
+                                                  (x*xv + y*yv + z*zv)%10 == 10-(len(words)-2)))
+                constraints.append(TernaryConstraint( variables[vlKeys[2]], variables[vlKeys[1]], variables[vlKeys[0]],
+                                    lambda x,y,z,xv=varLetters[vlKeys[2]],yv=varLetters[vlKeys[1]],zv=varLetters[vlKeys[0]]:
+                                                  (x*xv + y*yv + z*zv)%10 == 0 or
+                                                  (x*xv + y*yv + z*zv)%10 == -(len(words)-2) or
+                                                  (x*xv + y*yv + z*zv)%10 == 10-(len(words)-2)))
+                constraints.append(TernaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]], variables[vlKeys[2]],
+                                    lambda x,y,z,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]],zv=varLetters[vlKeys[2]]:
+                                                  (x*xv + y*yv + z*zv)%10 == 0 or
+                                                  (x*xv + y*yv + z*zv)%10 == -(len(words)-2) or
+                                                  (x*xv + y*yv + z*zv)%10 == 10-(len(words)-2)))
+            elif len(vlKeys) == 2:
+                constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
+                                    lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]]:
+                                                  (x*xv + y*yv)%10 == 0 or
+                                                  (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                  (x*xv + y*yv)%10 == 10-(len(words)-2)))
+                constraints.append(BinaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]],
+                                    lambda x,y,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]]:
+                                                  (x*xv + y*yv)%10 == 0 or
+                                                  (x*xv + y*yv)%10 == -(len(words)-2) or
+                                                  (x*xv + y*yv)%10 == 10-(len(words)-2)))
+            elif len(vlKeys) == 1:
+                constraints.append(UnaryConstraint( variables[vlKeys[0]],
+                                    lambda x,xv=varLetters[vlKeys[0]]:
+                                                  (x*xv)%10 == 0 or
+                                                  (x*xv)%10 == -(len(words)-2) or
+                                                  (x*xv)%10 == 10-(len(words)-2)))
+
+
+
+
+
 
 def setUpKenKen( variables, constraints, size ):
     rows = []
@@ -175,12 +348,11 @@ def Revise( cv ):
                 # for each value in the domain of variable 3
                 for z in dom3:
                 # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x
-                   if ( cv.func( x, y, z ) == False and cv.func( x, z, y ) == False and cv.func( y, x, z ) == False and cv.func( y, z, x ) == False
-                        and cv.func( z, x, y ) == False and cv.func( z, y, x ) == False ):
-                       check += 1
-                   if ( check == len( dom2 ) * len( dom3 ) ):
-                       cv.var1.domain.remove( x )
-                       revised = True
+                    if ( cv.func( x, y, z ) == False ):
+                        check += 1
+                    if ( check == len( dom2 ) * len( dom3 ) ):
+                        cv.var1.domain.remove( x )
+                        revised = True
 
     elif ( type( cv ) == BinaryConstraint ):
         if not ( cv.var2 in cv.var1.neighbors ):
@@ -196,7 +368,7 @@ def Revise( cv ):
             # for each value in the domain of variable 2
             for y in dom2:
             # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x
-               if ( cv.func( x, y ) == False and cv.func( y, x ) == False ):
+               if ( cv.func( x, y ) == False):
                    check += 1
                if ( check == len( dom2 ) ):
                    cv.var1.domain.remove( x )
@@ -239,34 +411,48 @@ def transferConstraint( cons, constraints, variables ):
             tc = TernaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 2 ] ], c.fn )
             constraints.append( tc )
 
-def AC3():
+
+def setupAC3(constraints, variables):
     # create a dictionary of ConstraintVars keyed by names in VarNames.
-    variables = dict()
-    constraints = []
-    cons = []
     op, words, letters = readCrypt()
 
     setUpCrypt(variables, constraints, words, letters, op)
     print("initial domains")
     printDomains( variables )
 
-    transferConstraint( cons, constraints, variables )
+
+def AC3(constraints, variables):
+    #transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
-    """
+
     # Initialize the queue by putting all the constraint variables in the queue
-    for
+    for c in constraints:
+        que.put(c)
 
     while not( que.empty() ):
         constr = que.get()
         if Revise( constr ):
-            if
+            que.put(constr)
+
+    print("\nFinal Domains")
+    printDomains( variables )
+
+    for k in variables.keys():
+        if len(variables[k].domain) == 0:
+            return -1
+        elif len(variables[k].domain) > 1:
+            return 0
+    return 1
+
 
 """
+const = []
+vars = dict()
+setupAC3(const, vars)
+AC3(const, vars)
 
 
-#AC3()
-readVars = readCrypt()
-
+"""
 
 
 

@@ -2,13 +2,15 @@ __author__ = 'Sean'
 from testRead import *
 import random
 import copy
-
+import AC3_Crypt
 class MacCrypt:
     # Initialize data
     def __init__(self, op, words, letters):
         self.op = op
         self.words = words
         self.letters = letters
+        self.cons = []
+        self.vars = dict()
 
     # Sets up and starts the solver
     def solve(self):
@@ -18,41 +20,31 @@ class MacCrypt:
             return 0
 
         # Setup variables dictionary, -1 for unassigned letters
-        variables = dict()
-        for l in self.letters:
-            variables[l] = -1
-
-        return self.solveRecurse(variables, [])
+        AC3_Crypt.setupAC3(self.cons, self.vars)
+        return self.solveRecurse(self.cons, self.vars)
 
     # Recursive part of the solver
-    def solveRecurse(self, variables, searchedDomain):
+    def solveRecurse(self, constraints, variables):
         # Check if solved
         finished = True
         emptyLetter = " "
         for k in variables.keys():
-            if variables[k] == -1:
-                finished = False
-                emptyLetter = k
-        # If solved, return
-        if finished:
-            solved = self.testSumSolution(variables)
-            if solved:
-                return variables
-            else:
-                return None
-        # Else keep searching
-        else:
-            # Try each digit
-            for i in range(10):
-                if i not in searchedDomain:
-                    variables[emptyLetter] = i
-                    searchedDomain.append(i)
-                    solution = self.solveRecurse(variables, searchedDomain)
-                    if solution != None:
-                        return solution
-                    searchedDomain.remove(i)
-        variables[emptyLetter] = -1
-        return None
+            for i in variables[k].domain:
+                domainCopy = copy.copy(variables[k].domain)
+                variables[k].domain = [i]
+                state = AC3_Crypt.AC3(constraints, variables)
+                if state == -1:
+                    return -1
+                elif state == 1:
+                    return 1
+                else:
+                    state = self.solveRecurse(constraints, variables)
+                    if state == -1:
+                        return -1
+                    elif state == 1:
+                        return 1
+                    else:
+                        c.domain = copy.copy(domainCopy)
 
 
     def testSumSolution(self, variables):
@@ -80,7 +72,6 @@ class MacCrypt:
             return True
         else:
             return False
-
 
 op, words, letters = readCrypt()
 solver = MacCrypt(op, words, letters)

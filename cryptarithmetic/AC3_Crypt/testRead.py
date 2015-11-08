@@ -110,7 +110,7 @@ def readCrypt():
 
     # read in the file with constraints for KenKen puzzles (1 line per puzzle)
     lines = open('testCrypt.txt').readlines()
-    testLine = 6 # test this line in file
+    testLine = 0 # test this line in file
     l = lines[testLine]
     #remove white space
     l=re.sub('[ ]','',l)
@@ -228,8 +228,8 @@ def readCrossMath():
         print('op var answer fn(16,16,4)',op2,' ',var3,' ',answer,' ',fn(16,16,4))
 
 if __name__ == "__main__":
-    readKenKen()
-    #readCrypt()
+    #readKenKen()
+    readCrypt()
     #readFutoshiki()
     #readCrossMath()
     
