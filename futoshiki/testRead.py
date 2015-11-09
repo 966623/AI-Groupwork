@@ -21,6 +21,10 @@ def readFutoshiki():
     def generateLambda(value):
       return lambda x: x == value
 
+    def generateInequalityLambda(op):
+      # op is a string that maps to the dictionary of op, x and y are values
+      return lambda x,y: ops[op](x,y)
+
     # start a dictionary of variables and a list of constraints
     vars = {}
     Cons = []
@@ -50,11 +54,11 @@ def readFutoshiki():
             lvar = re.findall('^\w+\d+',c)[0]
             rvar = re.findall('\w+\d+$',c)[0]
             op = re.findall('\W',c)[0]
-            #convert inequalities to lambda fn
-            fn = lambda x,y: ops[op](x,y)
+            
             # Make a Constraint, 0 stand for situation when x < y or x > y
             # print("Making Constraint: ", op, "lvar :", lvar, "rvar :", rvar)
-            Cons.append( ( 0, lvar, rvar, fn ) )
+            #convert inequalities to lambda fn
+            Cons.append( ( 0, lvar, rvar, generateInequalityLambda(op) ) )
             
         else:
             # find x = value
