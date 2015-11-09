@@ -161,26 +161,38 @@ def completeTest( assignment, csp ):
     for var in assignment:
         if assignment[ var ][ 0 ] == 0:
             check = False
-            break
-    for c in csp.constraints:
+            return check
+    """for c in csp.constraints:
         if ( type( c ) == UnaryConstraint ):
             if assignment[ c.var1.name ][0] == 0:  
                 check = False
-                break
+                return check
             # This branch used to avoid division by zero error.   
             elif c.func( assignment[ c.var1.name ][0] ) == False:
                 check = False
-                break
+                return check
         elif ( type( c ) == BinaryConstraint ):
             if assignment[ c.var1.name ][0] == 0 or assignment[ c.var2.name ][0] == 0:
                 check = False
-                break
+                return check
             # This branch used to avoid division by zero error.  
             elif c.func( assignment[ c.var1.name ][0] , assignment[ c.var2.name ][0] ) == False:
                 check = False
-                break
-    return check    
-
+                return check"""
+    return check   
+"""def completeTest( assignment, csp ):
+    check = True
+    for var in assignment:
+        if assignment[ var ][ 0 ] == 0:
+            check = False
+            return check
+    for c in csp.constraints:
+        if ( type( c ) == UnaryConstraint ) and ( c.func( assignment[ c.var1.name ][0] ) == False ) :
+            check = False
+        elif ( type( c ) == BinaryConstraint ) and \
+        ( c.func( assignment[ c.var1.name ][0] , assignment[ c.var2.name ][0] ) == False ) :
+            check = False 
+    return check """
     
 def consistentTest( var, value, csp ):
     check = False
@@ -220,7 +232,7 @@ def MAC( csp, var, assignment ):
                 if c.var1.name not in assignment[ var ][ 1 ]:
                     assignment[ var ][ 1 ][ c.var1.name ] = []
                 que.put( c )
-    consisit = AC3( csp, que, assignment, var )
+    consist = AC3( csp, que, assignment, var )
     return consist
                        
         
@@ -271,11 +283,11 @@ def backtrack( assignment, csp ):
                 if val != value:
                     csp.variables[ var ].domain.remove( val )
                     assignment[ var ][ 1 ][ var ].append( val )
-            print(" before MAC ")
-            printDomains( csp.variables, 3 )
+            #print(" before MAC ")
+            #printDomains( csp.variables, 3 )
             check = MAC( csp, var, assignment )
-            print(" After MAC ")
-            printDomains( csp.variables, 3 )
+            #print(" After MAC ")
+            #printDomains( csp.variables, 3 )
             if check:
                 result = backtrack( assignment, csp )
                 if result != False:
