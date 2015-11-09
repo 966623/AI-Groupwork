@@ -74,7 +74,7 @@ def readKenKen():
         # remove white space and brackets, then split constraint into answer,op,var
         c=re.sub('[[\] ]','',c)
         c=re.split(',',c)
-        #print('c ',c)
+        print('c ',c)
 
         # makeVars if not already in existence
         for v in c[2:len(c)]:
@@ -84,7 +84,7 @@ def readKenKen():
         op = c[1]
         answer = c[0]
         # make a constraint
-        #print(c[2:len(c)])
+        print(c[2:len(c)])
         Cons.append(Constraint( c[2:len(c)], op, answer ))
 
     return n,Cons
@@ -106,128 +106,6 @@ def readKenKen():
         print(v1.name,' ',v2.name,' ',v3.name)
         print('op ', c.fn(v1.domain[0],v2.domain[3],v3.domain[1]))"""
 
-def readCrypt():
-
-    # read in the file with constraints for KenKen puzzles (1 line per puzzle)
-    lines = open('testCrypt.txt').readlines()
-    testLine = 4 # test this line in file
-    l = lines[testLine]
-    #remove white space
-    l=re.sub('[ ]','',l)
-    print('l ',l)
-
-    # determine operator and remove, find "answer"
-    op = re.findall('^\W',l)
-    print('op ',op)
-    l = re.sub('^\W,','',l)
-    answer = re.findall('=\w+',l)
-    answer = re.sub('=','',answer[0])
-    print('l ',l,'answer ',answer)
-
-    # start a dictionary of variables and a list of constraints
-    Cons = []
-
-    vars = []
-    # separate values
-    words = re.findall('\w+',l)
-    for w in words:
-        letters = re.findall('\w',w)
-        for letter in letters:
-            if letter not in vars: vars.append(letter)
-    print('vars ',vars)
-
-def readFutoshiki():
-
-    # read in the file with constraints for KenKen puzzles (1 line per puzzle)
-    lines = open('testFutoshiki.txt').readlines()
-    testLine = 0 # test this line in file
-    l = lines[testLine]
-    #remove white space
-    l = re.sub('[ ]','',l)
-    print('l ',l)
-
-    # size of puzzle is first number on the line
-    n = eval(re.findall('^\d+',l)[0])
-    l = re.sub('^\d+','',l)
-    print('size ',n)
-    
-    # find all "x Op y" 
-    cs=re.findall('\w+\W+\w+',l)
-    print('c ',cs)
-
-    # for each, separate apart the variables, operator, and values
-    for c in cs:
-        # these are x < y OR x > y
-        if re.findall('\w+\d+<\w+\d+',c) or re.findall('\w+\d+>\w+\d+',c):
-            lvar = re.findall('^\w+\d+',c)[0]
-            rvar = re.findall('\w+\d+$',c)[0]
-            op = re.findall('\W',c)[0]
-            #convert inequalities to lambda fn
-            fn = lambda x,y: ops[op](x,y)
-            print('lvar,op,rvar,fn(3,4)',lvar,op,rvar,fn(3,4))
-        else:
-            # find x = value
-            if re.findall('\w+\d+=\d+',c):
-                var = re.findall('^\w+\d+',c)[0]
-                value = re.findall('\d+$',c)[0]
-            # find value = x
-            elif re.findall('\d+=\w+\d+',c):
-                var = re.findall('\w+\d+$',c)[0]
-                value = re.findall('^\d+$',c)[0]
-            # conver equalities to lambda fn
-            fn = lambda x: x == eval(value)
-            
-            #test results with a print
-            print('var,val,fn(1) ',var,'==',value,fn(1))
-
-def readCrossMath():
-
-    # I was assuming operators applied in order as listed on puzzle, but
-    # probably supposed to follow op precedence. If so, this isn't quite right.
-
-    # read in the file with constraints for KenKen puzzles (1 line per puzzle)
-    lines = open('testCrossMath.txt').readlines()
-    testLine = 0 # test this line in file
-    l = lines[testLine]
-    #remove white space
-    l=re.sub('[ ]','',l)
-    print('l ',l)
-
-    # split into the different constraints
-    cs=re.split(',',l)
-    print('cs ',cs)
-
-    # for each constraint, extract vars and create lambda
-    for c in cs:
-        # extract what the equation equates to
-        answer = re.findall('=\d+',c)
-        answer = re.sub('=','',answer[0])
-        c = re.sub('=\d+','',c)
-
-        groupRight = False
-        # check for parantheses for precedence
-        if re.search('\)',c):
-            if ( re.search('\)',c).start() == len(c)-2 ):
-                groupRight = True
-                c = re.sub('\(','',c)
-                c = re.sub('\)','',c)
- 
-        # extract the 2 operators and the 3 vars, create the function
-        op2 = re.findall('\W',c)
-        var3 = re.findall('\w+\d+',c)
-
-        print('c ',c)
-        if groupRight:
-            fn = lambda x,y,z : ops[op2[0]](x,ops[op2[1]](y,z)) == eval(answer)
-        else:
-            fn = lambda x,y,z : ops[op2[1]](ops[op2[0]](x,y),z) == eval(answer)
-        
-        # test the results with a print
-        print('op var answer fn(16,16,4)',op2,' ',var3,' ',answer,' ',fn(16,16,4))
 
 if __name__ == "__main__":
-    readKenKen()
-    #readCrypt()
-    #readFutoshiki()
-    #readCrossMath()
-    
+    readKenKen()    
