@@ -152,7 +152,7 @@ def transferConstraint( cons, csp ):
         # When ctype = 1, constraints are assignment.
         elif ctype == 1:
             var = c[ 1 ]
-            print("MAKING", c[2])
+            # print("MAKING", c[2])
             uc = UnaryConstraint( csp.variables[ var ], c[ 2 ] )
             csp.constraints.append( uc )
                      
@@ -177,7 +177,7 @@ def Revise( cv ):
                         check = True
                         break     
             if ( check == False ):
-                print("Removing Domain: ", x, " in BC with vars: ", cv.var1.name, cv.var2.name, "of Func ", inspect.getsource(cv.func))
+                # print("Removing Domain: ", x, " in BC with vars: ", cv.var1.name, cv.var2.name, "of Func ", inspect.getsource(cv.func))
                 cv.var1.domain.remove( x )
                 revised = True   
 
@@ -185,9 +185,9 @@ def Revise( cv ):
         dom = list( cv.var1.domain )
         # for each value in the domain of variable
         for x in dom:
-            print("val ", x, cv.func(x), cv.var1.name)
+            # print("val ", x, cv.func(x), cv.var1.name)
             if ( cv.func( x ) == False ):
-                print("Removing Domain: ", x, " in UC with var: " ,cv.var1.name, "of Func ", inspect.getsource(cv.func))
+                # print("Removing Domain: ", x, " in UC with var: " ,cv.var1.name, "of Func ", inspect.getsource(cv.func))
                 cv.var1.domain.remove( x )
                 revised = True
     return revised
