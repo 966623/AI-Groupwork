@@ -210,8 +210,7 @@ def transferConstraint( cons, csp ):
             tc3 = TernaryConstraint( csp.variables[ c.vlist[ 2 ] ], csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 1 ] ], c.fn )
             csp.constraints.append( tc3 )
 
-def AC3( csp ):
-    que = queue.Queue()
+def AC3( csp, que ):
     # Initialize the queue by putting all the constraint variables in the queue 
     for constraint in csp.constraints:
         que.put( constraint )         
@@ -247,7 +246,8 @@ def KenKen():
     transferConstraint( cons, csp )
     print("initial domains")
     printDomains( csp.variables, size )
-    AC3( csp )
+    que = queue.Queue()
+    AC3( csp, que )
     print("Domain after AC3")
     printDomains( csp.variables, size )
 
