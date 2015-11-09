@@ -21,51 +21,55 @@ class MacCrypt:
 
         # Setup variables dictionary, -1 for unassigned letters
         AC3_Crypt.setupAC3(self.cons, self.vars)
-        return self.solveRecurse(self.cons, self.vars)
+        keys = sorted(self.vars.keys(), key = lambda x: len(self.vars[x].domain))
+        for k in keys:
+            print(k, len(self.vars[k].domain))
+        return self.backtrace(self.cons, self.vars, keys, 0)
 
-    # Recursive part of the solver
-    def solveRecurse(self, constraints, variables):
-        # Check if solved
-        finished = True
-        emptyLetter = " "
-        for k in variables.keys():
-            for i in variables[k].domain:
-                domainCopy = copy.copy(variables[k].domain)
-                variables[k].domain = [i]
-                state = AC3_Crypt.AC3(constraints, variables)
-                if state == -1:
-                    return -1
-                elif state == 1:
-                    return 1
-                else:
-                    state = self.solveRecurse(constraints, variables)
-                    if state == -1:
-                        return -1
-                    elif state == 1:
-                        return 1
-                    else:
-                        c.domain = copy.copy(domainCopy)
+    def backtrace(self, constraints, variables, keys, keyIndex):
+        varCopy = copy.deepcopy(variables)
+        state = AC3_Crypt.AC3(constraints, varCopy)
 
+        if state == -1:
+            return None
+        if state == 1:
+            if self.testSumSolution(varCopy):
+                return varCopy
+            else:
+                return None
+
+        keyVal = keys[keyIndex]
+        #print(keyVal)
+        domain = copy.deepcopy(varCopy[keyVal].domain)
+
+        for d in list(domain):
+            varCopy[keyVal].domain = [d]
+            state = self.backtrace(constraints, varCopy, keys, keyIndex + 1)
+
+            if state != None:
+                return state
+
+        return None
 
     def testSumSolution(self, variables):
         # Calculate and add up variable values
         sum = 0
         for i in range(len(self.words) - 1):
             word = self.words[i]
-            if variables[word[0]]== 0:
+            if variables[word[0]].domain[0]== 0:
                 return False
             wordLen = len(word)
             for j in range(wordLen):
-                sum += (10**j) * variables[word[wordLen - j - 1]]
+                sum += (10**j) * variables[word[wordLen - j - 1]].domain[0]
 
         # Calculate and add up solution value
         solution = 0
         word = self.words[len(self.words) - 1]
-        if variables[word[0]]== 0:
+        if variables[word[0]].domain[0]== 0:
             return False
         wordLen = len(word)
         for j in range(wordLen):
-            solution += (10**j) * variables[word[wordLen - j - 1]]
+            solution += (10**j) * variables[word[wordLen - j - 1]].domain[0]
 
         # Return whether solution true or false
         if (solution == sum):
@@ -76,4 +80,7 @@ class MacCrypt:
 op, words, letters = readCrypt()
 solver = MacCrypt(op, words, letters)
 solution = solver.solve()
-print(solution)
+print("\nFinal Solution")
+for k in sorted(solution.keys()):
+    print(k, ", ", solution[k].domain)
+
