@@ -210,7 +210,7 @@ def AC3():
     # Copy over constraints into the Problem
     transferConstraint( cons, csp )
 
-    que = queue.Queue()
+    que = queue.LifoQueue()
 
     # Initialize the queue by putting all the constraint variables in the queue
     for constraint in csp.constraints:

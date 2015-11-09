@@ -47,7 +47,7 @@ def readFutoshiki():
     print('constraints ',cs)
 
     # for each, separate apart the variables, operator, and values
-    for c in cs:
+    for c in cs:  
         # these are x < y OR x > y
         if re.findall('\w+\d+<\w+\d+',c) or re.findall('\w+\d+>\w+\d+',c):
   
@@ -58,7 +58,19 @@ def readFutoshiki():
             # Make a Constraint, 0 stand for situation when x < y or x > y
             # print("Making Constraint: ", op, "lvar :", lvar, "rvar :", rvar)
             #convert inequalities to lambda fn
+            # Make the opposite constraint as well for CSP
+            if op == '<':
+              Cons.append( ( 0, rvar, lvar, generateInequalityLambda('>') ) )
+            if op == '>':
+              Cons.append( ( 0, rvar, lvar, generateInequalityLambda('<') ) )
+            if op == '>=':
+              Cons.append( ( 0, rvar, lvar, generateInequalityLambda('<=') ) )
+            if op == '<=':
+              Cons.append( ( 0, rvar, lvar, generateInequalityLambda('<=') ) )
+
+            # else just add the original inequality.
             Cons.append( ( 0, lvar, rvar, generateInequalityLambda(op) ) )
+            
             
         else:
             # find x = value
