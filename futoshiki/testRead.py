@@ -18,6 +18,9 @@ ops = {'+': operator.add,
 
 
 def readFutoshiki():
+    def generateLambda(value):
+      return lambda x: x == value
+
     # start a dictionary of variables and a list of constraints
     vars = {}
     Cons = []
@@ -37,7 +40,7 @@ def readFutoshiki():
     
     # find all "x Op y" 
     cs=re.findall('\w+\W+\w+',l)
-    print('c ',cs)
+    print('constraints ',cs)
 
     # for each, separate apart the variables, operator, and values
     for c in cs:
@@ -50,6 +53,7 @@ def readFutoshiki():
             #convert inequalities to lambda fn
             fn = lambda x,y: ops[op](x,y)
             # Make a Constraint, 0 stand for situation when x < y or x > y
+            # print("Making Constraint: ", op, "lvar :", lvar, "rvar :", rvar)
             Cons.append( ( 0, lvar, rvar, fn ) )
             
         else:
@@ -62,10 +66,11 @@ def readFutoshiki():
                 var = re.findall('\w+\d+$',c)[0]
                 value = re.findall('^\d+$',c)[0]
             # conver equalities to lambda fn
-            fn = lambda x: x == eval(value)
+            ## We need to use differed execution else only one lambda is selected
 
-            # Make a Constraint, 1 stand for situation when x < y or x > y 
-            Cons.append( ( 1, var, fn ) )
+            # Make a Constraint, 1 stand for situation when x < y or x > y
+            # print("Making Constraint: =", value, "var :", var)
+            Cons.append( ( 1, var, generateLambda(eval(value))))
             
     return n, Cons 
 
