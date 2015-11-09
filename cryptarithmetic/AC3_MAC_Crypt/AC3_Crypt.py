@@ -61,6 +61,10 @@ def allDiff( constraints, v ):
         for j in range( len( v ) ):
             if ( i != j ) :
                 constraints.append( BinaryConstraint( v[ i ], v[ j ], fn ) )
+                if not ( v[i] in v[j].neighbors ):
+                    v[j].neighbors.append(v[i])
+                if not ( v[j] in v[i].neighbors ):
+                    v[i].neighbors.append(v[j])
 
 def setUpCrypt(variables, constraints, words, letters, op):
     domain = [i for i in range(10)]
@@ -119,6 +123,19 @@ def setUpCrypt(variables, constraints, words, letters, op):
         vlKeys = list(varLetters.keys())
 
         if len(vlKeys) == 3:
+            if not ( variables[vlKeys[1]] in variables[vlKeys[2]].neighbors ):
+                variables[vlKeys[2]].neighbors( variables[vlKeys[1]])
+            if not ( variables[vlKeys[0]] in variables[vlKeys[2]].neighbors ):
+                variables[vlKeys[2]].neighbors( variables[vlKeys[0]])
+            if not ( variables[vlKeys[1]] in variables[vlKeys[0]].neighbors ):
+                variables[vlKeys[0]].neighbors( variables[vlKeys[1]])
+            if not ( variables[vlKeys[2]] in variables[vlKeys[0]].neighbors ):
+                variables[vlKeys[0]].neighbors( variables[vlKeys[2]])
+            if not ( variables[vlKeys[0]] in variables[vlKeys[1]].neighbors ):
+                variables[vlKeys[1]].neighbors( variables[vlKeys[0]])
+            if not ( variables[vlKeys[2]] in variables[vlKeys[1]].neighbors ):
+                variables[vlKeys[1]].neighbors( variables[vlKeys[2]])
+
             print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]],vlKeys[2],varLetters[vlKeys[2]])
             constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
                                 lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],
@@ -136,6 +153,12 @@ def setUpCrypt(variables, constraints, words, letters, op):
                                               (x*xv + y*yv + z*zv)%10 == 0 or
                                               (x*xv + y*yv + z*zv)%10 >= 10-(p-1)))
         elif len(vlKeys) == 2:
+
+            if not ( variables[vlKeys[0]] in variables[vlKeys[1]].neighbors ):
+                variables[vlKeys[1]].neighbors( variables[vlKeys[0]])
+            if not ( variables[vlKeys[1]] in variables[vlKeys[0]].neighbors ):
+                variables[vlKeys[0]].neighbors( variables[vlKeys[1]])
+
             print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]])
             constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
                                 lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]], p = prevNumVars:
@@ -348,13 +371,24 @@ def setupAC3(constraints, variables):
     printDomains( variables )
 
 
-def AC3(constraints, variables):
+def AC3(constraints, variables, var):
     #transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
 
     # Initialize the queue by putting all the constraint variables in the queue
-    for c in constraints:
-        que.put(c)
+
+    if var != None:
+        for c in constraints:
+            if type(c) == TernaryConstraint:
+                if c.var2.name == var.name or c.var3.name == var.name:
+                    que.put(c)
+            elif type(c) == BinaryConstraint:
+                if c.var2.name == var.name:
+                    que.put(c)
+    else:
+        for c in constraints:
+            que.put(c)
+
 
     while not( que.empty() ):
         constr = que.get()

@@ -21,14 +21,17 @@ class MacCrypt:
 
         # Setup variables dictionary, -1 for unassigned letters
         AC3_Crypt.setupAC3(self.cons, self.vars)
-        keys = sorted(self.vars.keys(), key = lambda x: len(self.vars[x].domain))
+        keys = list(self.vars.keys())
+        #keys = sorted(self.vars.keys(), key = lambda x: len(self.vars[x].domain))
         for k in keys:
             print(k, len(self.vars[k].domain))
         return self.backtrace(self.cons, self.vars, keys, 0)
 
-    def backtrace(self, constraints, variables, keys, keyIndex):
+    def backtrace(self, constraints, variables, keys, keyIndex, currentVar = None):
+
+
         varCopy = copy.deepcopy(variables)
-        state = AC3_Crypt.AC3(constraints, varCopy)
+        state = AC3_Crypt.AC3(constraints, varCopy, currentVar)
 
         if state == -1:
             return None
@@ -44,7 +47,7 @@ class MacCrypt:
 
         for d in list(domain):
             varCopy[keyVal].domain = [d]
-            state = self.backtrace(constraints, varCopy, keys, keyIndex + 1)
+            state = self.backtrace(constraints, varCopy, keys, keyIndex + 1, varCopy[keyVal])
 
             if state != None:
                 return state
