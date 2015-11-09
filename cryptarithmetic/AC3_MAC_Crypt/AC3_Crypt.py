@@ -1,8 +1,7 @@
 __author__ = 'Sean'
 from random import randrange
-# Sihan Chen
-# Project Part 2 : Comparison of CSP and Search Algorithms
-# Problem : KenKen
+# Sean Lin
+# Problem : Cryptarithmetic
 
 import sys
 import functools
@@ -136,7 +135,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
             if not ( variables[vlKeys[2]] in variables[vlKeys[1]].neighbors ):
                 variables[vlKeys[1]].neighbors( variables[vlKeys[2]])
 
-            print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]],vlKeys[2],varLetters[vlKeys[2]])
+            #print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]],vlKeys[2],varLetters[vlKeys[2]])
             constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
                                 lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],
                                        zv=varLetters[vlKeys[2]], p = prevNumVars:
@@ -159,7 +158,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
             if not ( variables[vlKeys[1]] in variables[vlKeys[0]].neighbors ):
                 variables[vlKeys[0]].neighbors( variables[vlKeys[1]])
 
-            print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]])
+            #print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]])
             constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
                                 lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]], p = prevNumVars:
                                               (x*xv + y*yv)%10 == 0 or
@@ -169,7 +168,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
                                               (x*xv + y*yv)%10 == 0 or
                                               (x*xv + y*yv)%10 >= 10-(p-1)))
         elif len(vlKeys) == 1:
-            print(vlKeys[0],varLetters[vlKeys[0]])
+            #print(vlKeys[0],varLetters[vlKeys[0]])
             constraints.append(UnaryConstraint( variables[vlKeys[0]],
                                 lambda x,xv=varLetters[vlKeys[0]], p = prevNumVars:
                                               (x*xv)%10 == 0 or
@@ -352,7 +351,7 @@ def setupAC3(constraints, variables):
     op, words, letters = readCrypt()
 
     setUpCrypt(variables, constraints, words, letters, op)
-    print("initial domains")
+    print("Initial Domains")
     printDomains( variables )
 
     #transferConstraint( cons, constraints, variables )
@@ -367,8 +366,9 @@ def setupAC3(constraints, variables):
         if Revise( constr, variables ):
             que.put(constr)
 
-    print("\nFirst Domains")
+    print("\nDomains after AC3")
     printDomains( variables )
+    print("\n")
 
 
 def AC3(constraints, variables, var):
@@ -397,7 +397,8 @@ def AC3(constraints, variables, var):
 
     #print("\nFinal Domains")
     #printDomains( variables )
-    dString = "."*randrange(1,6)
+    rInt = randrange(1,6)
+    dString = ("."*rInt) + (" " * (6-rInt))
     #print(dString)
     print("\rSolving" + dString, end ="")
 
