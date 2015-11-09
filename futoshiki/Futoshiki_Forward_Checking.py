@@ -105,7 +105,6 @@ class CSP():
         for variable in assignment[ var ][ 1 ]:
             for l in assignment[ var ][ 1 ][ variable ]:
                 csp.variables[ variable ].domain.append( l )
-        #csp.variables[ var ].domain.remove( value )
         assignment[ var ][ 0 ] = 0        
         
 
@@ -120,7 +119,7 @@ def transferConstraint( cons, csp ):
             rvar = c[ 2 ]
             bc = BinaryConstraint( csp.variables[ lvar ], csp.variables[ rvar ], c[ 3 ] )
             csp.constraints.append( bc )
- 
+            
         # When ctype = 1, constraints are assignement.
         elif ctype == 1:
             var = c[ 1 ]
@@ -136,7 +135,7 @@ def MRV( csp, assignment ):
         if ( assignment[ var ][0] == 0 ):
             dlen = len( csp.variables[ var ].domain )
             domainLen.append( ( var, dlen ) )
-    print(domainLen)           
+            
     # Determine the minimum domain value
 
     minVar = domainLen[ 0 ]
@@ -148,10 +147,8 @@ def MRV( csp, assignment ):
 
 def completeTest( assignment, csp ):
     check = True
-    if len( assignment ) != csp.size:
-        check = False
     for var in assignment:
-        if not( len( assignment[ var ] ) == 1 ):
+        if assignment[ var ][ 0 ] == 0:
             check = False
             break
     for c in csp.constraints:
@@ -195,29 +192,18 @@ def forward_checking( csp, var, assignment ):
         if ( type( c ) == BinaryConstraint ):
             # Consider var's neighbor
             if c.var2.name == var:
-                #print("start checking --------------")
-                #print(c.var1.name)
                 if c.var1.name not in assignment[ var ][ 1 ]:
                     assignment[ var ][ 1 ][ c.var1.name ] = []
-                    #print("assignment0", assignment[ var ][ 0 ])
-                    #print("assignment1", assignment[ var ][ 1 ])
                 value = assignment[ var ][ 0 ]
-                #print("var value",value)
                 domain = list( c.var1.domain )
-                #print("c.var1. checking domain",domain)
                 # For each value in the domain of variable 2
                 for x in domain:
                     if c.func( x, value ) == False:
                         c.var1.domain.remove( x )
                         assignment[ var ][ 1 ][ c.var1.name ].append( x )
-                print("assignment",c.var1.name, assignment[ var ][ 1 ])
-                
-                printDomains( csp.variables, 3 )
                 if not( c.var1.domain ):
-                    print( "checking with empty ------" )
                     consist = False
-                    break
-    print("end checking without empty -------- ")                
+                    break               
     return consist
     
         
@@ -230,15 +216,12 @@ def backtracking_search( csp ):
 
 
 def backtrack( assignment, csp ):
+    #print(assignment)
     if completeTest( assignment, csp ):
         return assignment    
     var = MRV( csp, assignment )
-    print("begin=================")
-    print(csp.variables[ var ].name)
     dom = copy.copy( csp.variables[ var ].domain )
     for value in dom:
-        print("var",var)
-        print("value",value)
         inferences = dict()
         if consistentTest( var, value, csp ):
             assignment[ var ] = [ value, inferences ]
@@ -248,20 +231,12 @@ def backtrack( assignment, csp ):
                 if val != value:
                     csp.variables[ var ].domain.remove( val )
                     assignment[ var ][ 1 ][ var ].append( val )
-            print(" Before forward_checking 000000000000000000000 "  )
-            printDomains( csp.variables, 3 )
-            print("after forward_checking ==============xxxxxx")
             check = forward_checking( csp, var, assignment )
-            printDomains( csp.variables, 3 ) 
             if check:
-                print("check",check)
                 result = backtrack( assignment, csp )
                 if result != False:
                     return result 
-            printDomains( csp.variables, 3 )
-            print("daozhe")
             csp.reset( var, value, assignment, csp )
-            print("guo le reset")
     return False         
             
 
@@ -280,7 +255,7 @@ def Futoshiki():
     transferConstraint( cons, csp )
     assignment = backtracking_search( csp )
     printDomains( csp.variables, size )
-    print(assignment)
+    #print(assignment)
 
     
         
