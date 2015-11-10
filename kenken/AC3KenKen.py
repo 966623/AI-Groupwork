@@ -247,6 +247,8 @@ def KenKen():
     print("initial domains")
     printDomains( csp.variables, size )
     que = queue.Queue()
+    for constraint in csp.constraints:
+        que.put( constraint )
     AC3( csp, que )
     print("Domain after AC3")
     printDomains( csp.variables, size )
