@@ -14,8 +14,10 @@ class DFSCross:
         self.vars = dict()
         self.nodesExplored = 0
 
+    # Set up data for the search
     def solve(self):
 
+        # Create 1d array of variables
         for a in range(3):
             for b in self.var[a]:
                 self.varList.append(b)
@@ -31,14 +33,16 @@ class DFSCross:
         print("Nodes explored: ", self.nodesExplored)
         return sol
 
+
     def DFS(self, varIndex, dom):
         self.nodesExplored += 1
+
+        # Check each value for the variable
         for i in dom:
-            #print("Depth: ", varIndex, i)
             self.vars[self.varList[varIndex]] = i
 
+            # Check if solved or if no solution
             if varIndex == len(self.varList) - 1:
-                #print("Max Level")
                 solved = self.isSolution()
                 if solved:
                     #print("Solved")
@@ -47,6 +51,7 @@ class DFSCross:
                 else:
                     return None
 
+            # Check next variable if solution so far isn't obviously wrong
             isValid = self.isSolution()
             if isValid:
                 newDom = copy.copy(dom)
@@ -58,6 +63,7 @@ class DFSCross:
         self.vars[self.varList[varIndex]] = -1
         return None
 
+    # Tests to see if solution is valid
     def isSolution(self):
         valid = True
         opList = self.op
