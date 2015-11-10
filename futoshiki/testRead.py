@@ -35,7 +35,7 @@ def readFutoshiki():
     l = lines[testLine]
     #remove white space
     l = re.sub('[ ]','',l)
-    print('l ',l)
+    # print('l ',l)
     
     # size of puzzle is first number on the line
     n = eval(re.findall('^\d+',l)[0])

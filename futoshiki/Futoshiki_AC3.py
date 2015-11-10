@@ -210,6 +210,10 @@ def AC3():
     # Copy over constraints into the Problem
     transferConstraint( cons, csp )
 
+    # Print Initial Domains
+    print("Initial Domains:")
+    printDomains(csp.variables, size)
+
     que = queue.LifoQueue()
 
     # Initialize the queue by putting all the constraint variables in the queue
@@ -230,11 +234,11 @@ def AC3():
                     if type( constraint ) == BinaryConstraint and \
                         constraint.var1 != constr.var1 and \
                         constraint.var1 != constr.var2 and \
-                        constraint.var2 == constr.var1: \
+                        constraint.var2 == constr.var1:
                         que.put( constraint )
         # else:
             # print("Not revised")
-    print("Here are the domains:")                       
+    print("\nHere are the domains after AC3:")                       
     printDomains( csp.variables, size )
 
 
