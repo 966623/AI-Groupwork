@@ -132,11 +132,16 @@ def transferConstraint( cons, csp ):
         elif num_var == 3:
             tc1 = TernaryConstraint( csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 1 ] ], csp.variables[ c.vlist[ 2 ] ], c.fn )
             csp.constraints.append( tc1 )
-            tc2 = TernaryConstraint( csp.variables[ c.vlist[ 1 ] ], csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 2 ] ], c.fn )
+            tc2 = TernaryConstraint( csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 2 ] ], csp.variables[ c.vlist[ 1 ] ], c.fn )
             csp.constraints.append( tc2 )
-            tc3 = TernaryConstraint( csp.variables[ c.vlist[ 2 ] ], csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 1 ] ], c.fn )
+            tc3 = TernaryConstraint( csp.variables[ c.vlist[ 1 ] ], csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 2 ] ], c.fn )
             csp.constraints.append( tc3 )
-            
+            tc4 = TernaryConstraint( csp.variables[ c.vlist[ 1 ] ], csp.variables[ c.vlist[ 2 ] ], csp.variables[ c.vlist[ 0 ] ], c.fn )
+            csp.constraints.append( tc4 )
+            tc5 = TernaryConstraint( csp.variables[ c.vlist[ 2 ] ], csp.variables[ c.vlist[ 0 ] ], csp.variables[ c.vlist[ 1 ] ], c.fn )
+            csp.constraints.append( tc5 )
+            tc6 = TernaryConstraint( csp.variables[ c.vlist[ 2 ] ], csp.variables[ c.vlist[ 1 ] ], csp.variables[ c.vlist[ 0 ] ], c.fn )
+            csp.constraints.append( tc6 )
 
 def MRV( csp, assignment ):
     # Select the variable with fewest possible value, that is fewest value in its domain.
@@ -162,37 +167,9 @@ def completeTest( assignment, csp ):
         if assignment[ var ][ 0 ] == 0:
             check = False
             return check
-    """for c in csp.constraints:
-        if ( type( c ) == UnaryConstraint ):
-            if assignment[ c.var1.name ][0] == 0:  
-                check = False
-                return check
-            # This branch used to avoid division by zero error.   
-            elif c.func( assignment[ c.var1.name ][0] ) == False:
-                check = False
-                return check
-        elif ( type( c ) == BinaryConstraint ):
-            if assignment[ c.var1.name ][0] == 0 or assignment[ c.var2.name ][0] == 0:
-                check = False
-                return check
-            # This branch used to avoid division by zero error.  
-            elif c.func( assignment[ c.var1.name ][0] , assignment[ c.var2.name ][0] ) == False:
-                check = False
-                return check"""
+
     return check   
-"""def completeTest( assignment, csp ):
-    check = True
-    for var in assignment:
-        if assignment[ var ][ 0 ] == 0:
-            check = False
-            return check
-    for c in csp.constraints:
-        if ( type( c ) == UnaryConstraint ) and ( c.func( assignment[ c.var1.name ][0] ) == False ) :
-            check = False
-        elif ( type( c ) == BinaryConstraint ) and \
-        ( c.func( assignment[ c.var1.name ][0] , assignment[ c.var2.name ][0] ) == False ) :
-            check = False 
-    return check """
+
     
 def consistentTest( var, value, csp ):
     check = False
@@ -213,6 +190,32 @@ def consistentTest( var, value, csp ):
                     if c.func( value, x ):
                         check = True
                         break
+        elif ( type( c ) == TernaryConstraint ):
+            # Consider var's neighbor
+            if c.var3.name == var:
+                domain1 = list( c.var1.domain )
+                domain2 = list( c.var2.domain )
+                for x in domain1:
+                    for y in domain2:
+                        if c.func( x, y, value ):
+                            check = True
+                            break
+            if c.var2.name == var:
+                domain1 = list( c.var1.domain )
+                domain2 = list( c.var3.domain )
+                for x in domain1:
+                    for y in domain2:
+                        if c.func( x, value, y ):
+                            check = True
+                            break
+            elif c.var1.name == var:
+                domain1 = list( c.var2.domain )
+                domain2 = list( c.var3.domain )
+                for x in domain1:
+                    for y in domain2:
+                        if c.func( value, x, y ):
+                            check = True
+                            break                      
     return True        
 
             
@@ -283,16 +286,13 @@ def backtrack( assignment, csp ):
                 if val != value:
                     csp.variables[ var ].domain.remove( val )
                     assignment[ var ][ 1 ][ var ].append( val )
-            #print(" before MAC ")
-            #printDomains( csp.variables, 3 )
             check = MAC( csp, var, assignment )
-            #print(" After MAC ")
-            #printDomains( csp.variables, 3 )
             if check:
                 result = backtrack( assignment, csp )
                 if result != False:
                     return result 
             csp.reset( var, value, assignment, csp )
+            #print("reset")
     return False         
             
 
@@ -300,7 +300,7 @@ def AC3( csp, que, assignment, var ):
     # Initialize the queue by putting all the constraint variables in the queue         
     while not( que.empty() ):
         constr = que.get()
-        if Revise( constr, assignment, var ):
+        if Revise( constr, assignment, var ):   
             if constr.var1.domain == []:
                 return False
             if type( constr ) == BinaryConstraint:
@@ -319,24 +319,16 @@ def AC3( csp, que, assignment, var ):
                         if constraint.var1.name not in assignment[ var ][ 1 ]:
                             assignment[ var ][ 1 ][ constraint.var1.name ] = []
                         que.put( constraint )    
-                    if type( constraint ) == TernaryConstraint and constraint.var1 != constr.var1: 
-                        if constraint.var1 != constr.var2 and constraint.var1 != constr.var3 and ( constraint.var2 == constr.var1 or constraint.var3 == constr.var1 ):
-                            if constraint.var1.name not in assignment[ var ][ 1 ]:
-                                assignment[ var ][ 1 ][ constraint.var1.name ] = []
-                            que.put( constraint )
-                        if ( constraint.var1 == constr.var2 and constraint.var2 == constr.var1 and constraint.var3 != constr.var3 ) or\
-                           ( constraint.var1 == constr.var2 and constraint.var2 == constr.var3 and constraint.var3 != constr.var1 ) or\
-                           ( constraint.var1 == constr.var3 and constraint.var2 == constr.var1 and constraint.var3 != constr.var2 ) or\
-                           ( constraint.var1 == constr.var3 and constraint.var2 == constr.var2 and constraint.var3 != constr.var1 ):
-                            if constraint.var1.name not in assignment[ var ][ 1 ]:
-                                assignment[ var ][ 1 ][ constraint.var1.name ] = []
-                            que.put( constraint )                       
+                    if type( constraint ) == TernaryConstraint and constraint.var1 != constr.var1 and ( constraint.var2 == constr.var1 or constraint.var3 == constr.var1 ):
+                        if constraint.var1.name not in assignment[ var ][ 1 ]:
+                            assignment[ var ][ 1 ][ constraint.var1.name ] = []
+                        que.put( constraint )
     return True
 
 
 def Revise( cv, assignment, var ):
     revised = False 
-    if ( type( cv ) == TernaryConstraint ):                                                                                                                                                     
+    if ( type( cv ) == TernaryConstraint ):
         dom1 = list( cv.var1.domain )
         dom2 = list( cv.var2.domain ) 
         dom3 = list( cv.var3.domain )
@@ -345,11 +337,8 @@ def Revise( cv, assignment, var ):
             check = False
             # for each value in the domain of variable 2
             for y in dom2:
-                if y != x:
                     # for each value in the domain of variable 3
-                    for z in dom3:
-                        if z != y and z != x:    
-                        # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x
+                    for z in dom3:    
                             if not ( cv.func( x, y, z ) == False and cv.func( x, z, y ) == False and cv.func( y, x, z ) == False and cv.func( y, z, x ) == False\
                                 and cv.func( z, x, y ) == False and cv.func( z, y, x ) == False ):
                                     check = True
@@ -385,8 +374,7 @@ def Revise( cv, assignment, var ):
             if ( cv.func( x ) == False ):
                 cv.var1.domain.remove( x )
                 assignment[ var ][ 1 ][ c.var1.name ].append( x )
-                revised = True
-        
+                revised = True       
     return revised
 
 

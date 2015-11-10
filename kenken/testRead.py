@@ -74,8 +74,7 @@ def readKenKen():
         # remove white space and brackets, then split constraint into answer,op,var
         c=re.sub('[[\] ]','',c)
         c=re.split(',',c)
-        print('c ',c)
-
+        
         # makeVars if not already in existence
         for v in c[2:len(c)]:
             #print('v ',v)
@@ -84,27 +83,9 @@ def readKenKen():
         op = c[1]
         answer = c[0]
         # make a constraint
-        print(c[2:len(c)])
         Cons.append(Constraint( c[2:len(c)], op, answer ))
 
     return n,Cons
-    #for k in vars:
-        #print(k)
-
-    #test the results for line 0
-    """if ( testLine == 0 ):
-        # 2 var constraint
-        c = Cons[0]
-        print(c.vlist)
-        v1, v2 = vars[c.vlist[0]], vars[c.vlist[1]]
-        print(v1.name,'=',v1.domain[3],' ',v2.name,'=',v2.domain[0])
-        print('op ', c.fn(v1.domain[3],v2.domain[0]))
-
-        # 3 var constraint
-        c = Cons[5]
-        v1, v2, v3 = vars[c.vlist[0]], vars[c.vlist[1]], vars[c.vlist[2]]
-        print(v1.name,' ',v2.name,' ',v3.name)
-        print('op ', c.fn(v1.domain[0],v2.domain[3],v3.domain[1]))"""
 
 
 if __name__ == "__main__":
