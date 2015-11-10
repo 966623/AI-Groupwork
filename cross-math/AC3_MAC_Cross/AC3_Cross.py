@@ -247,9 +247,9 @@ def AC3(constraints, variables, var = None):
 
     #print("\nFinal Domains")
     #printDomains( variables )
-    dString = "."*randrange(1,6)
+    #dString = "."*randrange(1,6)
     #print(dString)
-    print("\rSolving" + dString, end ="")
+    #print("\rSolving" + dString, end ="")
 
     for k in list(variables.keys()):
         if len(variables[k].domain) == 0:
