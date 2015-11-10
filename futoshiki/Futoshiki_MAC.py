@@ -183,7 +183,7 @@ def Revise(  cv, assignment, var  ):
             for y in dom2:
                 if y != x:
                 # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x      
-                    if not ( cv.func( x, y ) == False and cv.func( y, x ) == False ):
+                    if not ( cv.func( x, y ) == False):
                         check = True
                         break     
             if ( check == False ):
