@@ -322,10 +322,10 @@ def AC3(constraints, variables, var = None):
 
     #print("\nFinal Domains")
     #printDomains( variables )
-    rInt = randrange(1,6)
-    dString = ("."*rInt) + (" " * (6-rInt))
+    #rInt = randrange(1,6)
+    #dString = ("."*rInt) + (" " * (6-rInt))
     #print(dString)
-    print("\rSolving" + dString, end ="")
+    #print("\rSolving" + dString, end ="")
 
     # returns whether all domains reduced to 1, or has an empty domain
     for k in list(variables.keys()):
