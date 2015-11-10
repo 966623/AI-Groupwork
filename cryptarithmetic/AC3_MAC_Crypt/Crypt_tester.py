@@ -24,6 +24,7 @@ def runMAC():
     for k in sorted(solution.keys()):
         print(k, " = ", solution[k].domain[0])
 
+# Makes menu items
 mainChoice = menu.ChoicePrompt("Do you want to run AC3 or MAC?", ["AC3", "MAC"])
 chooseTest = menu.InputPrompt("Which puzzle, numbers 0 - 6, do you want to run?", int, lineDict, "line",
                               lambda x: int(x) >= 0 and int(x) <= 6)
@@ -31,6 +32,7 @@ setLine = menu.FunctionRun(setLineRead, lineDict)
 runAC3Test = menu.FunctionRun(runAC3, None)
 runMACTest = menu.FunctionRun(runMAC, None)
 
+# Create menu tree
 runAC3Node = menu.menuNode(runAC3Test, [])
 runMACNode = menu.menuNode(runMACTest, [])
 setAC3TestNode = menu.menuNode(setLine, [runAC3Node])
@@ -46,4 +48,5 @@ setMACTestNode.setReturnNode(choseMACNode)
 runAC3Node.setReturnNode(mainChoiceNode)
 runMACNode.setReturnNode(mainChoiceNode)
 
+# Run menu
 mainChoiceNode.execute()

@@ -1,9 +1,9 @@
 __author__ = 'Sean'
 from random import randrange
-# Sihan Chen
-# Project Part 2 : Comparison of CSP and Search Algorithms
-# Problem : KenKen
+# Sean Lin
+# Cross Math
 
+import time
 import sys
 import functools
 import queue
@@ -62,99 +62,8 @@ def allDiff( constraints, v ):
             if ( i != j ) :
                 constraints.append( BinaryConstraint( v[ i ], v[ j ], fn ) )
 
-def setUpCrypt(variables, constraints, words, letters, op):
-    domain = [i for i in range(10)]
 
-    for l in letters:
-        variables[l] = ConstraintVar(domain, l)
-
-    allCons = []
-    for k in variables.keys():
-        allCons.append( variables[k] )
-
-    # Constrain all letters to different digits
-    allDiff( constraints, allCons )
-
-    # Set max word length, constrain all first letters to not 0
-    maxWordLength = 0
-    maxVarLength = 0
-    for w in range(len(words)):
-        constraints.append(UnaryConstraint( variables[words[w][0]], lambda x: x != 0 ))
-
-        if len(words[w]) > maxWordLength:
-            maxWordLength = len(words[w])
-        if len(words[w]) > maxVarLength and w < len(words)-1:
-            maxVarLength = len(words[w])
-    prevNumVars = 1
-    # Constrain columns to add up
-    for i in range(maxWordLength):
-        varLetters = {}
-        numVars = 0
-        # Count number of times each letter appears in column
-        for j in range(len(words)-1):
-            index = len(words[j]) - i - 1
-            if i < len(words[j]):
-                numVars +=1
-                vlKeys = list(varLetters.keys())
-                if (vlKeys.count(words[j][index]) == 0):
-                    varLetters[words[j][index]] = 1
-                else:
-                    varLetters[words[j][index]] += 1
-        #print(numVars)
-        # Take the letters in solution to account
-        j = len(words)-1
-        index = len(words[j]) - i - 1
-        if i < len(words[j]):
-            vlKeys = list(varLetters.keys())
-            if (vlKeys.count(words[j][index]) == 0):
-                if len(vlKeys) == 0:
-                    #print(prevNumVars)
-                    constraints.append(UnaryConstraint( variables[words[j][index]], lambda x, p = prevNumVars: x < p ))
-                else:
-                    varLetters[words[j][index]] = -1
-            else:
-                varLetters[words[j][index]] -= 1
-        #print(varLetters)
-
-        vlKeys = list(varLetters.keys())
-
-        if len(vlKeys) == 3:
-            #print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]],vlKeys[2],varLetters[vlKeys[2]])
-            constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
-                                lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],
-                                       zv=varLetters[vlKeys[2]], p = prevNumVars:
-                                              (x*xv + y*yv + z*zv)%10 == 0 or
-                                              (x*xv + y*yv + z*zv)%10 >= 10-(p-1)))
-            constraints.append(TernaryConstraint( variables[vlKeys[2]], variables[vlKeys[1]], variables[vlKeys[0]],
-                                lambda x,y,z,xv=varLetters[vlKeys[2]],yv=varLetters[vlKeys[1]],
-                                       zv=varLetters[vlKeys[0]], p = prevNumVars:
-                                              (x*xv + y*yv + z*zv)%10 == 0 or
-                                              (x*xv + y*yv + z*zv)%10 >= 10-(p-1)))
-            constraints.append(TernaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]], variables[vlKeys[2]],
-                                lambda x,y,z,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]],
-                                       zv=varLetters[vlKeys[2]], p = prevNumVars:
-                                              (x*xv + y*yv + z*zv)%10 == 0 or
-                                              (x*xv + y*yv + z*zv)%10 >= 10-(p-1)))
-        elif len(vlKeys) == 2:
-            #print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]])
-            constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
-                                lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]], p = prevNumVars:
-                                              (x*xv + y*yv)%10 == 0 or
-                                              (x*xv + y*yv)%10 >= 10-(p-1)))
-            constraints.append(BinaryConstraint( variables[vlKeys[1]], variables[vlKeys[0]],
-                                lambda x,y,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]], p = prevNumVars:
-                                              (x*xv + y*yv)%10 == 0 or
-                                              (x*xv + y*yv)%10 >= 10-(p-1)))
-        elif len(vlKeys) == 1:
-            #print(vlKeys[0],varLetters[vlKeys[0]])
-            constraints.append(UnaryConstraint( variables[vlKeys[0]],
-                                lambda x,xv=varLetters[vlKeys[0]], p = prevNumVars:
-                                              (x*xv)%10 == 0 or
-                                              (x*xv)%10 >= 10-(p-1)))
-
-
-        prevNumVars = numVars
-
+# setup up cross math constraints
 def setUpCross(variables, constraints, op, var, ans, groupR):
     vList = []
     vList = vList + var[0] + var[1] + var[2]
@@ -169,9 +78,10 @@ def setUpCross(variables, constraints, op, var, ans, groupR):
     for k in variables.keys():
         allCons.append( variables[k] )
 
-    # Constrain all letters to different digits
+    # Constrain all spaces to different digits
     allDiff( constraints, allCons )
 
+    # Constrain each set of spaces using the given equation
     for i in range(len(op)):
         #print(groupR[i])
         if groupR[i]:
@@ -199,80 +109,6 @@ def setUpCross(variables, constraints, op, var, ans, groupR):
             constraints.append(TernaryConstraint(variables[var[i][2]],variables[var[i][1]],variables[var[i][0]],
                                                  lambda x,y,z,op1 = ops[op[i][0]], op2 = ops[op[i][1]],a = int(ans[i]):
                                                  op2(op1(z,y),x) == a))
-
-
-
-
-
-
-def setUpKenKen( variables, constraints, size ):
-    rows = []
-    cols = []
-    doma = []
-    for c in ( chr( i ) for i in range( 65, 65 + size ) ):
-        rows.append( c )
-
-    for i in range( 1, size+1 ):
-        cols.append( str( i ) )
-
-    for i in range( 1, size+1 ):
-        doma.append( i )
-
-    varNames = [ x+y for x in rows for y in cols ]
-    for var in varNames:
-        variables[var] = ConstraintVar( doma, var )
-
-    # varname is a 2 dimensional list used in setUpNeighbor function
-    varname = []
-    k = 0
-    for i in range( 0, size ):
-        new = []
-        for j in range( 0, size ):
-            new.append( varNames[ k ] )
-            k = k + 1
-        varname.append( new )
-
-
-    setUpNeighbor( varname, variables, size )
-    # establish the allDiff constraint for each column and each row
-    # for AC3, all constraints would be added to the queue
-
-    # for example, for rows A,B,C, generate constraints A1!=A2!=A3, B1!=B2...
-    for r in rows:
-        aRow = []
-        for k in variables.keys():
-            if ( str(k).startswith(r) ):
-        #accumulate all ConstraintVars contained in row 'r'
-                aRow.append( variables[k] )
-    #add the allDiff constraints among those row elements
-        allDiff( constraints, aRow )
-
-    # for example, for cols 1,2,3 (with keys A1,B1,C1 ...) generate A1!=B1!=C1, A2!=B2 ...
-    for c in cols:
-        aCol = []
-        for k in variables.keys():
-            key = str(k)
-            # the column is indicated in the 2nd character of the key string
-            if ( key[1] == c ):
-        # accumulate all ConstraintVars contained in column 'c'
-                aCol.append( variables[k] )
-        allDiff( constraints, aCol )
-
-
-def setUpNeighbor( varname, variables, size ):
-    # Add other elements in one element's row to its neighbor
-    for i in range( 0, size ):
-        for j in range( 0, size ):
-            for k in range( 0, size ):
-                if k != j:
-                    variables[ varname[ i ][ j ] ].neighbors.append( variables[ varname[ i ][ k ] ] )
-
-    # Add other elements in one element's column to its neighbor
-    for j in range( 0, size ):
-        for i in range( 0, size ):
-            for k in range( 0, size ):
-                if k != i:
-                    variables[ varname[ i ][ j ] ].neighbors.append( variables[ varname[ k ][ j ] ])
 
 def Revise( cv , variables):
     revised = False
@@ -355,24 +191,12 @@ def printDomains( vars, n=3 ):
         if ( 0 == count % n ):
             print(' ')
 
-def transferConstraint( cons, constraints, variables ):
-    for c in cons:
-        num_var = c.nvars
-        if num_var == 1:
-            uc = UnaryConstraint( variables[ c.vlist[ 0 ] ], c.fn )
-            constraints.append( uc )
-        elif num_var == 2:
-            bc = BinaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], c.fn )
-            constraints.append( bc )
-        elif num_var == 3:
-            tc = TernaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 2 ] ], c.fn )
-            constraints.append( tc )
-
-
+# Sets up variables and constraints, runs ac3 once
 def setupAC3(constraints, variables):
     # create a dictionary of ConstraintVars keyed by names in VarNames.
     op, var, ans, groupR = readCrossMath()
 
+    t = time.time()
     setUpCross(variables, constraints, op, var, ans, groupR)
     print("Initial Domains")
     printDomains( variables )
@@ -389,11 +213,14 @@ def setupAC3(constraints, variables):
         if Revise( constr, variables ):
             que.put(constr)
 
+    t = time.time() - t
     print("\nDomains after AC3")
     printDomains( variables )
+    print("\n")
+    print("AC3 Time Taken: ", t)
 
-
-def AC3(constraints, variables, var):
+# Runs ac3 on the variables and constraints again. only ques neighbors of var if var isn't None
+def AC3(constraints, variables, var = None):
     #transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
 

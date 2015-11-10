@@ -1,6 +1,6 @@
 __author__ = 'Sean'
 from testRead import *
-import random
+import time
 import copy
 import AC3_Cross
 class MacCrypt:
@@ -12,19 +12,28 @@ class MacCrypt:
         self.groupR = groupR
         self.cons = []
         self.vars = dict()
+        self.nodesExplored = 0
 
     # Sets up and starts the solver
     def solve(self):
 
-        # Setup variables dictionary, -1 for unassigned letters
+        # Setup variables and constraints
+        t = time.time()
         AC3_Cross.setupAC3(self.cons, self.vars)
         keys = list(self.vars.keys())
         #keys = sorted(self.vars.keys(), key = lambda x: len(self.vars[x].domain))
         #for k in keys:
             #print(k, len(self.vars[k].domain))
-        return self.backtrace(self.cons, self.vars, keys, 0)
+        final =  self.backtrace(self.cons, self.vars, keys, 0)
+        t = time.time()-t
+        print("MAC Time Taken: ", t)
+        print("MAC Nodes Explored: ", self.nodesExplored)
+        return final
 
+    # Searches over each space, guessing values and trying them.
     def backtrace(self, constraints, variables, keys, keyIndex, currentVar = None):
+        self.nodesExplored += 1
+        # Check if solution is found, or if there's no solution
         varCopy = copy.deepcopy(variables)
         state = AC3_Cross.AC3(constraints, varCopy, currentVar)
 
@@ -37,8 +46,11 @@ class MacCrypt:
         #print(keyVal)
         domain = copy.deepcopy(varCopy[keyVal].domain)
 
+        # Try each possible value
         for d in list(domain):
             varCopy[keyVal].domain = [d]
+
+            # Try values for next space
             state = self.backtrace(constraints, varCopy, keys, keyIndex + 1, varCopy[keyVal])
 
             if state != None:
