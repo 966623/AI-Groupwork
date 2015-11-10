@@ -3,10 +3,10 @@ from random import randrange
 # Sean Lin
 # Problem : Cryptarithmetic
 
+import time
 import sys
 import functools
 import queue
-from functools import reduce
 from testRead import *
 # The primary problem set-up consists of "variables" and "constraints":
 #   "variables" are a dictionary of constraint variables (of type ConstraintVar), example variables['A1']
@@ -65,7 +65,9 @@ def allDiff( constraints, v ):
                 if not ( v[j] in v[i].neighbors ):
                     v[i].neighbors.append(v[j])
 
+# Set up cryptarithmetic constraints
 def setUpCrypt(variables, constraints, words, letters, op):
+    # A variable represents a different letter
     domain = [i for i in range(10)]
 
     for l in letters:
@@ -89,11 +91,12 @@ def setUpCrypt(variables, constraints, words, letters, op):
         if len(words[w]) > maxVarLength and w < len(words)-1:
             maxVarLength = len(words[w])
     prevNumVars = 1
+
     # Constrain columns to add up
     for i in range(maxWordLength):
         varLetters = {}
         numVars = 0
-        # Count number of times each letter appears in column
+        # Count number of times each letter to be added appears in column
         for j in range(len(words)-1):
             index = len(words[j]) - i - 1
             if i < len(words[j]):
@@ -103,7 +106,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
                     varLetters[words[j][index]] = 1
                 else:
                     varLetters[words[j][index]] += 1
-        #print(numVars)
+
         # Take the letters in solution to account
         j = len(words)-1
         index = len(words[j]) - i - 1
@@ -121,6 +124,10 @@ def setUpCrypt(variables, constraints, words, letters, op):
 
         vlKeys = list(varLetters.keys())
 
+
+        # Constraint the letters. In each column, the sum of each letter to be added, minus the letter in the answer
+        # Must be a multiple of 10, or slightly less than a multiple of 10 if carrying digits are taken into account
+        # if 3 letters in a column, ternary constraint
         if len(vlKeys) == 3:
             if not ( variables[vlKeys[1]] in variables[vlKeys[2]].neighbors ):
                 variables[vlKeys[2]].neighbors( variables[vlKeys[1]])
@@ -151,6 +158,8 @@ def setUpCrypt(variables, constraints, words, letters, op):
                                        zv=varLetters[vlKeys[2]], p = prevNumVars:
                                               (x*xv + y*yv + z*zv)%10 == 0 or
                                               (x*xv + y*yv + z*zv)%10 >= 10-(p-1)))
+
+        # binary constraint
         elif len(vlKeys) == 2:
 
             if not ( variables[vlKeys[0]] in variables[vlKeys[1]].neighbors ):
@@ -167,6 +176,8 @@ def setUpCrypt(variables, constraints, words, letters, op):
                                 lambda x,y,xv=varLetters[vlKeys[1]],yv=varLetters[vlKeys[0]], p = prevNumVars:
                                               (x*xv + y*yv)%10 == 0 or
                                               (x*xv + y*yv)%10 >= 10-(p-1)))
+
+        #unary
         elif len(vlKeys) == 1:
             #print(vlKeys[0],varLetters[vlKeys[0]])
             constraints.append(UnaryConstraint( variables[vlKeys[0]],
@@ -176,80 +187,6 @@ def setUpCrypt(variables, constraints, words, letters, op):
 
 
         prevNumVars = numVars
-
-
-
-
-
-
-def setUpKenKen( variables, constraints, size ):
-    rows = []
-    cols = []
-    doma = []
-    for c in ( chr( i ) for i in range( 65, 65 + size ) ):
-        rows.append( c )
-
-    for i in range( 1, size+1 ):
-        cols.append( str( i ) )
-
-    for i in range( 1, size+1 ):
-        doma.append( i )
-
-    varNames = [ x+y for x in rows for y in cols ]
-    for var in varNames:
-        variables[var] = ConstraintVar( doma, var )
-
-    # varname is a 2 dimensional list used in setUpNeighbor function
-    varname = []
-    k = 0
-    for i in range( 0, size ):
-        new = []
-        for j in range( 0, size ):
-            new.append( varNames[ k ] )
-            k = k + 1
-        varname.append( new )
-
-
-    setUpNeighbor( varname, variables, size )
-    # establish the allDiff constraint for each column and each row
-    # for AC3, all constraints would be added to the queue
-
-    # for example, for rows A,B,C, generate constraints A1!=A2!=A3, B1!=B2...
-    for r in rows:
-        aRow = []
-        for k in variables.keys():
-            if ( str(k).startswith(r) ):
-        #accumulate all ConstraintVars contained in row 'r'
-                aRow.append( variables[k] )
-    #add the allDiff constraints among those row elements
-        allDiff( constraints, aRow )
-
-    # for example, for cols 1,2,3 (with keys A1,B1,C1 ...) generate A1!=B1!=C1, A2!=B2 ...
-    for c in cols:
-        aCol = []
-        for k in variables.keys():
-            key = str(k)
-            # the column is indicated in the 2nd character of the key string
-            if ( key[1] == c ):
-        # accumulate all ConstraintVars contained in column 'c'
-                aCol.append( variables[k] )
-        allDiff( constraints, aCol )
-
-
-def setUpNeighbor( varname, variables, size ):
-    # Add other elements in one element's row to its neighbor
-    for i in range( 0, size ):
-        for j in range( 0, size ):
-            for k in range( 0, size ):
-                if k != j:
-                    variables[ varname[ i ][ j ] ].neighbors.append( variables[ varname[ i ][ k ] ] )
-
-    # Add other elements in one element's column to its neighbor
-    for j in range( 0, size ):
-        for i in range( 0, size ):
-            for k in range( 0, size ):
-                if k != i:
-                    variables[ varname[ i ][ j ] ].neighbors.append( variables[ varname[ k ][ j ] ])
 
 def Revise( cv , variables):
     revised = False
@@ -332,29 +269,15 @@ def printDomains( vars, n=3 ):
         if ( 0 == count % n ):
             print(' ')
 
-def transferConstraint( cons, constraints, variables ):
-    for c in cons:
-        num_var = c.nvars
-        if num_var == 1:
-            uc = UnaryConstraint( variables[ c.vlist[ 0 ] ], c.fn )
-            constraints.append( uc )
-        elif num_var == 2:
-            bc = BinaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], c.fn )
-            constraints.append( bc )
-        elif num_var == 3:
-            tc = TernaryConstraint( variables[ c.vlist[ 0 ] ], variables[ c.vlist[ 1 ] ], variables[ c.vlist[ 2 ] ], c.fn )
-            constraints.append( tc )
-
-
+# Sets up and runs ac3 once
 def setupAC3(constraints, variables):
     # create a dictionary of ConstraintVars keyed by names in VarNames.
     op, words, letters = readCrypt()
-
+    t = time.time()
     setUpCrypt(variables, constraints, words, letters, op)
     print("Initial Domains")
     printDomains( variables )
 
-    #transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
 
     # Initialize the queue by putting all the constraint variables in the queue
@@ -366,12 +289,14 @@ def setupAC3(constraints, variables):
         if Revise( constr, variables ):
             que.put(constr)
 
+    t = time.time()-t
     print("\nDomains after AC3")
     printDomains( variables )
     print("\n")
+    print("Time taken for AC3: ", t)
 
-
-def AC3(constraints, variables, var):
+# Runs ac3 again. Only ques neighbors of var, unless var is none
+def AC3(constraints, variables, var = None):
     #transferConstraint( cons, constraints, variables )
     que = queue.LifoQueue()
 
@@ -402,6 +327,7 @@ def AC3(constraints, variables, var):
     #print(dString)
     print("\rSolving" + dString, end ="")
 
+    # returns whether all domains reduced to 1, or has an empty domain
     for k in list(variables.keys()):
         if len(variables[k].domain) == 0:
             return -1
