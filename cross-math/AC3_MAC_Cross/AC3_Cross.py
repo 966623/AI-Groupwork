@@ -119,7 +119,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
         vlKeys = list(varLetters.keys())
 
         if len(vlKeys) == 3:
-            print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]],vlKeys[2],varLetters[vlKeys[2]])
+            #print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]],vlKeys[2],varLetters[vlKeys[2]])
             constraints.append(TernaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]], variables[vlKeys[2]],
                                 lambda x,y,z,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]],
                                        zv=varLetters[vlKeys[2]], p = prevNumVars:
@@ -136,7 +136,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
                                               (x*xv + y*yv + z*zv)%10 == 0 or
                                               (x*xv + y*yv + z*zv)%10 >= 10-(p-1)))
         elif len(vlKeys) == 2:
-            print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]])
+            #print(vlKeys[0],varLetters[vlKeys[0]],vlKeys[1],varLetters[vlKeys[1]])
             constraints.append(BinaryConstraint( variables[vlKeys[0]], variables[vlKeys[1]],
                                 lambda x,y,xv=varLetters[vlKeys[0]],yv=varLetters[vlKeys[1]], p = prevNumVars:
                                               (x*xv + y*yv)%10 == 0 or
@@ -146,7 +146,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
                                               (x*xv + y*yv)%10 == 0 or
                                               (x*xv + y*yv)%10 >= 10-(p-1)))
         elif len(vlKeys) == 1:
-            print(vlKeys[0],varLetters[vlKeys[0]])
+            #print(vlKeys[0],varLetters[vlKeys[0]])
             constraints.append(UnaryConstraint( variables[vlKeys[0]],
                                 lambda x,xv=varLetters[vlKeys[0]], p = prevNumVars:
                                               (x*xv)%10 == 0 or
@@ -158,7 +158,7 @@ def setUpCrypt(variables, constraints, words, letters, op):
 def setUpCross(variables, constraints, op, var, ans, groupR):
     vList = []
     vList = vList + var[0] + var[1] + var[2]
-    print(vList)
+    #print(vList)
 
     domain = [i for i in range(1,10)]
 
@@ -173,7 +173,7 @@ def setUpCross(variables, constraints, op, var, ans, groupR):
     allDiff( constraints, allCons )
 
     for i in range(len(op)):
-        print(groupR[i])
+        #print(groupR[i])
         if groupR[i]:
             constraints.append(TernaryConstraint(variables[var[i][0]],variables[var[i][1]],variables[var[i][2]],
                                                  lambda x,y,z,op1 = ops[op[i][0]], op2 = ops[op[i][1]], a = int(ans[i]):
@@ -374,7 +374,7 @@ def setupAC3(constraints, variables):
     op, var, ans, groupR = readCrossMath()
 
     setUpCross(variables, constraints, op, var, ans, groupR)
-    print("initial domains")
+    print("Initial Domains")
     printDomains( variables )
 
     #transferConstraint( cons, constraints, variables )
@@ -389,7 +389,7 @@ def setupAC3(constraints, variables):
         if Revise( constr, variables ):
             que.put(constr)
 
-    print("\nFirst Domains")
+    print("\nDomains after AC3")
     printDomains( variables )
 
 
@@ -430,14 +430,12 @@ def AC3(constraints, variables, var):
         elif len(variables[k].domain) > 1:
             return 0
     return 1
-
+"""
 const = []
 vars = dict()
 setupAC3(const, vars)
 AC3(const, vars, None)
-
-
-
+"""
 
 
 

@@ -20,8 +20,8 @@ class MacCrypt:
         AC3_Cross.setupAC3(self.cons, self.vars)
         keys = list(self.vars.keys())
         #keys = sorted(self.vars.keys(), key = lambda x: len(self.vars[x].domain))
-        for k in keys:
-            print(k, len(self.vars[k].domain))
+        #for k in keys:
+            #print(k, len(self.vars[k].domain))
         return self.backtrace(self.cons, self.vars, keys, 0)
 
     def backtrace(self, constraints, variables, keys, keyIndex, currentVar = None):
@@ -45,7 +45,7 @@ class MacCrypt:
                 return state
 
         return None
-
+"""
 op, var, ans, groupR = readCrossMath()
 solver = MacCrypt(op, var, ans, groupR)
 solution = solver.solve()
@@ -53,3 +53,4 @@ print("\nFinal Solution")
 for k in sorted(solution.keys()):
     print(k, ", ", solution[k].domain)
 
+"""
