@@ -1,5 +1,53 @@
 __author__ = 'Sean'
 
+
+class AdversarialSearch:
+    # Initialize
+    def __init__(self, state=None, actions=None, utility=0, player="X", terminalTest = 0):
+        self.state = state
+        self.actions = actions ## A list of all possible actions at this state
+        self.utility
+        self.player = player  ## The current player at this state (assumed that X goes first)
+        self.terminalTest = terminalTest ## This indicates the final state. Is 1 when final state
+
+#####
+
+    def result(self,state,action):
+        ## Return the state resulting from the current action
+        return 0
+
+#####
+    ## if the player is X, we choose this funciton
+    def maxValue(self,state):
+        bestVal = 0
+        if self.terminalTest:
+            ## Return the utility function value
+            return self.utility
+        else:
+            for action in self.actions:
+                min = self.minValue(self.result(state,action))
+                if bestVal <= min:
+                    bestVal = min
+        return bestVal
+
+#####
+    ## if the player is O, we choose this function
+    def minValue(self,state):
+        bestVal = 0
+        if self.terminalTest:
+            ## Return the utility function value
+            return self.utility
+        else:
+            for action in self.actions:
+                min = self.maxValue(self.result(state,action))
+                if bestVal <= min:
+                    bestVal = min
+        return bestVal
+
+
+########################################################################################################################
+
+
 class TicTacToe:
 
     # Initialize board
