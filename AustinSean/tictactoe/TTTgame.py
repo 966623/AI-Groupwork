@@ -1,7 +1,7 @@
 __author__ = 'Sean'
 
-from TicTacToe import TicTacToe
-import tempSearch
+from TicTacToe import *
+
 
 class TTTgame:
     def __init__(self):
@@ -10,15 +10,18 @@ class TTTgame:
     def run(self):
         game = TicTacToe()
 
-        player1 = tempSearch.tempSearch()
-        player2 = tempSearch.tempSearch()
+        player1 = AdversarialSearch(None,None,0,"X")
+        player2 = AdversarialSearch(None,None,0,"O")
         while game.isGameOver() == " ":
-            player1.tempTurn()
+
+            (x1,y1) = player1.maxValue(player1.state)
+            game.setPiece(x1,y1)
 
             if game.isGameOver() != " ":
                 break
 
-            player2.tempTurn()
+            (x2,y2) = player2.minValue(player2.state)
+            game.setPiece(x2,y2)
 
         status = game.isGameOver()
 

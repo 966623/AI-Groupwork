@@ -6,7 +6,7 @@ class AdversarialSearch:
     def __init__(self, state=None, actions=None, utility=0, player="X", terminalTest = 0):
         self.state = state
         self.actions = actions ## A list of all possible actions at this state
-        self.utility
+        self.utility = utility
         self.player = player  ## The current player at this state (assumed that X goes first)
         self.terminalTest = terminalTest ## This indicates the final state. Is 1 when final state
 
@@ -17,7 +17,7 @@ class AdversarialSearch:
         return 0
 
 #####
-    ## if the player is X, we choose this funciton
+    ## if the player is X, we choose this function
     def maxValue(self,state):
         bestVal = 0
         if self.terminalTest:
