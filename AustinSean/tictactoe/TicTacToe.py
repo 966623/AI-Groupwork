@@ -32,6 +32,7 @@ class AdversarialSearch:
             return -1
         return 0
 #####
+
     ## if the player is X, we choose this function
     def maxValue(self,state):
         bestVal = -1
@@ -46,7 +47,7 @@ class AdversarialSearch:
             currentActions = state.getSpaces()
             for action in currentActions:
                 (max,a) = self.minValue(self.result(state,action,"X"))
-                if max >= bestVal:
+                if max > bestVal:
                     bestVal = max
                     bestAction = action
         return (bestVal,bestAction)
@@ -65,13 +66,117 @@ class AdversarialSearch:
             currentActions = state.getSpaces()
             for action in currentActions:
                 (min,a) = self.maxValue(self.result(state,action,"O"))
-                if min <= bestVal:
+                if min < bestVal:
                     bestVal = min
                     bestAction = action
         return (bestVal,bestAction)
 
 
 ########################################################################################################################
+
+class AlphaBetaSearch:
+    # Initialize
+    def __init__(self, state=None, player="X", alpha = -2, beta = 2):
+
+        # State keeps the board, which is a TicTacToe class
+        self.state = TicTacToe(state)
+
+        # A list of all possible actions at this state
+        # Generated from the state, is a list of (x,y) position tuples
+        self.actions = self.state.getSpaces()
+        self.player = player  ## The current player at this state (assumed that X goes first)
+        self.alpha = alpha
+        self.beta = beta
+
+#####
+
+
+    def result(self,state,action, player):
+        newState = state.copy()
+        (x,y) = action
+        newState.setPiece(x,y,player)
+        ## Return the state resulting from the current action
+        return newState
+
+    def utility(self,status):
+        if status == "TIE":
+            return 0
+        if status == "X":
+            return 1
+        if status == "O":
+            return -1
+        return 0
+#####
+    ## if the player is X, we choose this function
+    def maxValueAB(self,state,alpha,beta):
+        bestVal = -1
+        bestAction = (0,0)
+
+        # terminalTest
+        status = state.isGameOver()
+        if status != " ":
+            ## Return the utility function value
+            return (self.utility(status),(0,0))
+
+        else:
+            currentActions = state.getSpaces()
+            for action in currentActions:
+
+                (max,a) = self.minValueAB(self.result(state,action,"X"),alpha,beta)
+
+                ## bestVal = MAX(bestVal,max)  ##
+                if max > bestVal:             ##
+                    bestVal = max              ##
+                    bestAction = action        ##
+                #################################
+
+                ## alpha = MAX(alpha, bestVal) ##
+                if bestVal > alpha:      ##
+                    alpha = bestVal       ##
+                #################################
+
+                if beta <= alpha:
+                    break ## beta cut-off
+
+        return (bestVal,bestAction)
+
+#####
+    ## if the player is O, we choose this function
+    def minValueAB(self,state,alpha,beta):
+        bestVal = 1
+        bestAction = (0,0)
+
+        # terminalTest
+        status = state.isGameOver()
+        if status != " ":
+            ## Return the utility function value
+            return (self.utility(status),(0,0))
+
+        else:
+            currentActions = state.getSpaces()
+            for action in currentActions:
+
+                (min,a) = self.maxValueAB(self.result(state,action,"O"),alpha,beta)
+
+                ## bestVal = MIN(bestVal,min) ##
+                if min < bestVal:            ##
+                    bestVal = min             ##
+                    bestAction = action       ##
+                ################################
+
+                ## beta = MIN(beta, bestVal) ##
+                if bestVal < beta:     ##
+                    beta = bestVal      ##
+                ###############################
+
+                if beta <= alpha:
+                    break ## alpha cut-off
+
+        return (bestVal,bestAction)
+
+
+########################################################################################################################
+
 
 
 class TicTacToe:
