@@ -3,24 +3,34 @@ __author__ = 'Sean'
 
 class AdversarialSearch:
     # Initialize
-    def __init__(self, state=None, actions=None, utility=0, player="X", terminalTest = 0):
-        self.state = state
-        self.actions = actions ## A list of all possible actions at this state
+    def __init__(self, state=None, utility=0, player="X"):
+
+        # State keeps the board, which is a TicTacToe class
+        self.state = TicTacToe(state)
+
+        # A list of all possible actions at this state
+        # Generated from the state, is a list of (x,y) position tuples
+        self.actions = self.state.getSpaces()
         self.utility = utility
         self.player = player  ## The current player at this state (assumed that X goes first)
-        self.terminalTest = terminalTest ## This indicates the final state. Is 1 when final state
+        # self.terminalTest = terminalTest
 
 #####
 
     def result(self,state,action):
+        newState = state.copy()
+        (x,y) = action
+        newState.setPiece(x,y,self.player)
         ## Return the state resulting from the current action
-        return 0
+        return newState
 
 #####
     ## if the player is X, we choose this function
     def maxValue(self,state):
         bestVal = 0
-        if self.terminalTest:
+
+        # terminalTest
+        if self.state.isGameOver() != " ":
             ## Return the utility function value
             return self.utility
         else:
@@ -34,7 +44,9 @@ class AdversarialSearch:
     ## if the player is O, we choose this function
     def minValue(self,state):
         bestVal = 0
-        if self.terminalTest:
+
+        # terminalTest
+        if self.state.isGameOver() != " ":
             ## Return the utility function value
             return self.utility
         else:
@@ -67,11 +79,15 @@ class TicTacToe:
         return output
 
     # If possible, place piece and switch turns
-    def setPiece(self, x, y):
+    def setPiece(self, x, y, piece = " "):
         if self.board[x][y] != " ":
             print("There is already a piece at " + str(x) + "," + str(y))
             return -1
-        self.board[x][y] = self.turn
+
+        if piece != " ":
+            self.board[x][y] = piece
+        else:
+            self.board[x][y] = self.turn
 
 
         if self.turn == "X":
@@ -85,6 +101,15 @@ class TicTacToe:
 
     def getPiece(self,x,y):
         return self.board[x][y]
+
+    # Returns empty spots, which are valid moves
+    def getSpaces(self):
+        spaceList = []
+        for i in range (0,3):
+            for j in range(0,3):
+                if self.board[i][j] == " ":
+                    spaceList.append((i,j))
+        return spaceList
 
     # X wins  , returns 'X'
     # O wins  , returns 'O'
@@ -113,3 +138,10 @@ class TicTacToe:
             winner = "TIE"
 
         return winner
+
+    # returns copy of board
+    def copy(self):
+        newBoard = TicTacToe()
+        newBoard.board = self.board
+        newBoard.turn = self.turn
+        return newBoard
