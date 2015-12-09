@@ -34,7 +34,7 @@ class AdversarialSearch:
 #####
     ## if the player is X, we choose this function
     def maxValue(self,state):
-        bestVal = 0
+        bestVal = -1
         bestAction = (0,0)
         # terminalTest
         status = state.isGameOver()
@@ -46,7 +46,7 @@ class AdversarialSearch:
             currentActions = state.getSpaces()
             for action in currentActions:
                 (max,a) = self.minValue(self.result(state,action,"X"))
-                if bestVal >= max:
+                if max >= bestVal:
                     bestVal = max
                     bestAction = action
         return (bestVal,bestAction)
@@ -54,7 +54,7 @@ class AdversarialSearch:
 #####
     ## if the player is O, we choose this function
     def minValue(self,state):
-        bestVal = 0
+        bestVal = 1
         bestAction = (0,0)
         # terminalTest
         status = state.isGameOver()
@@ -65,7 +65,7 @@ class AdversarialSearch:
             currentActions = state.getSpaces()
             for action in currentActions:
                 (min,a) = self.maxValue(self.result(state,action,"O"))
-                if bestVal <= min:
+                if min <= bestVal:
                     bestVal = min
                     bestAction = action
         return (bestVal,bestAction)
