@@ -1,7 +1,7 @@
 __author__ = 'Sean'
 
 from TicTacToe import *
-
+from time import time
 class TTTgame:
     def __init__(self, none = 0):
         self.temp = 0
@@ -75,6 +75,16 @@ class TTTABgame:
         else:
             print(status + " WINS")
 
-g = TTTABgame
-#g = TTTgame
+g = TTTgame
+h = TTTABgame
+
+t0 = time()
 g.play(g)
+t1 = time()
+
+t2 = time()
+h.play(h)
+t3 = time()
+
+print("reg elapsed: ",t1-t0)
+print("AB elapsed: ",t3-t2)

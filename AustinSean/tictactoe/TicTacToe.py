@@ -1,5 +1,7 @@
-__author__ = 'Sean'
+__author__ = 'Sean','Austin'
 
+moves = 0
+abmoves = 0
 
 class AdversarialSearch:
     # Initialize
@@ -35,6 +37,7 @@ class AdversarialSearch:
 
     ## if the player is X, we choose this function
     def maxValue(self,state):
+        global moves
         bestVal = -1
         bestAction = (0,0)
         # terminalTest
@@ -46,15 +49,18 @@ class AdversarialSearch:
         else:
             currentActions = state.getSpaces()
             for action in currentActions:
+                moves += 1
                 (max,a) = self.minValue(self.result(state,action,"X"))
                 if max > bestVal:
                     bestVal = max
                     bestAction = action
+    #    print("total moves: ",moves)
         return (bestVal,bestAction)
 
 #####
     ## if the player is O, we choose this function
     def minValue(self,state):
+        global moves
         bestVal = 1
         bestAction = (0,0)
         # terminalTest
@@ -65,10 +71,12 @@ class AdversarialSearch:
         else:
             currentActions = state.getSpaces()
             for action in currentActions:
+                moves += 1
                 (min,a) = self.maxValue(self.result(state,action,"O"))
                 if min < bestVal:
                     bestVal = min
                     bestAction = action
+    #    print("total moves: ",moves)
         return (bestVal,bestAction)
 
 
@@ -109,6 +117,7 @@ class AlphaBetaSearch:
 #####
     ## if the player is X, we choose this function
     def maxValueAB(self,state,alpha,beta):
+        global abmoves
         bestVal = -1
         bestAction = (0,0)
 
@@ -121,6 +130,8 @@ class AlphaBetaSearch:
         else:
             currentActions = state.getSpaces()
             for action in currentActions:
+
+                abmoves += 1
 
                 (max,a) = self.minValueAB(self.result(state,action,"X"),alpha,beta)
 
@@ -137,12 +148,13 @@ class AlphaBetaSearch:
 
                 if beta <= alpha:
                     break ## beta cut-off
-
+    #    print("total moves: ",abmoves)
         return (bestVal,bestAction)
 
 #####
     ## if the player is O, we choose this function
     def minValueAB(self,state,alpha,beta):
+        global abmoves
         bestVal = 1
         bestAction = (0,0)
 
@@ -155,6 +167,8 @@ class AlphaBetaSearch:
         else:
             currentActions = state.getSpaces()
             for action in currentActions:
+
+                abmoves += 1
 
                 (min,a) = self.maxValueAB(self.result(state,action,"O"),alpha,beta)
 
@@ -171,7 +185,7 @@ class AlphaBetaSearch:
 
                 if beta <= alpha:
                     break ## alpha cut-off
-
+    #    print("total moves: ",abmoves)
         return (bestVal,bestAction)
 
 
