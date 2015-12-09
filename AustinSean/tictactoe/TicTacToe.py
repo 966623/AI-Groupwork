@@ -3,9 +3,9 @@ __author__ = 'Sean'
 class TicTacToe:
 
     # Initialize board
-    def __init__(self):
+    def __init__(self, first = "X"):
         self.board = [[" " for i in range(0,3)] for j in range(0,3)]
-        self.turn = "X"
+        self.turn = first
 
     # Print board
     def __str__(self):
