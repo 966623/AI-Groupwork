@@ -3,7 +3,7 @@ __author__ = 'Sean'
 
 class AdversarialSearch:
     # Initialize
-    def __init__(self, state=None, utility=0, player="X"):
+    def __init__(self, state=None, player="X"):
 
         # State keeps the board, which is a TicTacToe class
         self.state = TicTacToe(state)
@@ -11,50 +11,64 @@ class AdversarialSearch:
         # A list of all possible actions at this state
         # Generated from the state, is a list of (x,y) position tuples
         self.actions = self.state.getSpaces()
-        self.utility = utility
         self.player = player  ## The current player at this state (assumed that X goes first)
         # self.terminalTest = terminalTest
 
 #####
 
-    def result(self,state,action):
+    def result(self,state,action, player):
         newState = state.copy()
         (x,y) = action
-        newState.setPiece(x,y,self.player)
+        newState.setPiece(x,y,player)
         ## Return the state resulting from the current action
         return newState
 
+    def utility(self,status):
+        if status == "TIE":
+            return 0
+        if status == "X":
+            return 1
+        if status == "O":
+            return -1
+        return 0
 #####
     ## if the player is X, we choose this function
     def maxValue(self,state):
         bestVal = 0
-
+        bestAction = (0,0)
         # terminalTest
-        if self.state.isGameOver() != " ":
+        status = state.isGameOver()
+        if status != " ":
             ## Return the utility function value
-            return self.utility
+
+            return (self.utility(status),(0,0))
         else:
-            for action in self.actions:
-                min = self.minValue(self.result(state,action))
-                if bestVal <= min:
-                    bestVal = min
-        return bestVal
+            currentActions = state.getSpaces()
+            for action in currentActions:
+                (max,a) = self.minValue(self.result(state,action,"X"))
+                if bestVal >= max:
+                    bestVal = max
+                    bestAction = action
+        return (bestVal,bestAction)
 
 #####
     ## if the player is O, we choose this function
     def minValue(self,state):
         bestVal = 0
-
+        bestAction = (0,0)
         # terminalTest
-        if self.state.isGameOver() != " ":
+        status = state.isGameOver()
+        if status != " ":
             ## Return the utility function value
-            return self.utility
+            return (self.utility(status),(0,0))
         else:
-            for action in self.actions:
-                min = self.maxValue(self.result(state,action))
+            currentActions = state.getSpaces()
+            for action in currentActions:
+                (min,a) = self.maxValue(self.result(state,action,"O"))
                 if bestVal <= min:
                     bestVal = min
-        return bestVal
+                    bestAction = action
+        return (bestVal,bestAction)
 
 
 ########################################################################################################################
@@ -70,7 +84,7 @@ class TicTacToe:
     # Print board
     def __str__(self):
         output = ""
-        output += (self.turn + "'s turn\n")
+        output += ("\n" + str(self.turn) + "'s turn\n")
         for row in range(0,3):
             for col in range(0,3):
                 output += self.board[col][row]
@@ -88,7 +102,6 @@ class TicTacToe:
             self.board[x][y] = piece
         else:
             self.board[x][y] = self.turn
-
 
         if self.turn == "X":
             self.turn = "O"
@@ -142,6 +155,13 @@ class TicTacToe:
     # returns copy of board
     def copy(self):
         newBoard = TicTacToe()
-        newBoard.board = self.board
+        b = [[self.board[j][i] for i in range(0,3)] for j in range(0,3)]
+        newBoard.board = b
         newBoard.turn = self.turn
         return newBoard
+
+"""
+ttt = TicTacToe()
+player1 = AdversarialSearch(TicTacToe,"X")
+print(player1.maxValue(player1.state))
+"""
