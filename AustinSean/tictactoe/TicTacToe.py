@@ -2,6 +2,8 @@ __author__ = 'Sean','Austin'
 
 moves = 0
 abmoves = 0
+dlmoves = 0
+depth = 0
 
 class AdversarialSearch:
     # Initialize
@@ -186,6 +188,289 @@ class AlphaBetaSearch:
                 if beta <= alpha:
                     break ## alpha cut-off
     #    print("total moves: ",abmoves)
+        return (bestVal,bestAction)
+
+########################################################################################################################
+
+class DepthLimitedSearch:
+    # Initialize
+    def __init__(self, state=None, player="X", alpha = -20, beta = 20,depth = 0):
+
+        # State keeps the board, which is a TicTacToe class
+        self.state = TicTacToe(state)
+
+        # A list of all possible actions at this state
+        # Generated from the state, is a list of (x,y) position tuples
+        self.actions = self.state.getSpaces()
+        self.player = player  ## The current player at this state (assumed that X goes first)
+        self.alpha = alpha
+        self.beta = beta
+        self.depth = depth
+
+#####
+
+    def result(self,state,action, player):
+        newState = state.copy()
+        (x,y) = action
+        newState.setPiece(x,y,player)
+        ## Return the state resulting from the current action
+        return newState
+
+#####
+
+    def utility(self,status):
+        if status == "TIE":
+            return 0
+        if status == "X":
+            return 1
+        if status == "O":
+            return -1
+        return 0
+
+#####
+
+    def cutoffTest(self,state,depth):
+        tof = 0
+        if depth > 5:
+            tof = 1
+        else:
+            tof = 0
+        return tof
+
+
+#####
+    ## This could be a very dumb way to do this...
+    def evalFn(self,state,player):
+        print("IN EVAL FN")
+        Xsum = 0
+        Osum = 0
+
+        ## (0,0) ##
+        if state.getPiece(0,0) == "X":
+            if (state.getPiece(0,1) != "O") and (state.getPiece(0,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,0) != "O") and (state.getPiece(2,0) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,1) != "O") and (state.getPiece(2,2) != "O"):
+                Xsum += 1
+        if state.getPiece(0,0) == "O":
+            if (state.getPiece(0,1) != "X") and (state.getPiece(0,2) != "X"):
+                Osum += 1
+            if (state.getPiece(1,0) != "X") and (state.getPiece(2,0) != "X"):
+                Osum += 1
+            if (state.getPiece(1,1) != "X") and (state.getPiece(2,2) != "X"):
+                Osum += 1
+
+        ## (0,1) ##
+        if state.getPiece(0,1) == "X":
+            if (state.getPiece(0,0) != "O") and (state.getPiece(0,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,1) != "O") and (state.getPiece(2,1) != "O"):
+                Xsum += 1
+        if state.getPiece(0,1) == "O":
+            if (state.getPiece(0,0) != "X") and (state.getPiece(0,2) != "X"):
+                Osum += 1
+            if (state.getPiece(1,1) != "X") and (state.getPiece(2,1) != "X"):
+                Osum += 1
+
+        ## (0,2) ##
+        if state.getPiece(0,2) == "X":
+            if (state.getPiece(0,0) != "O") and (state.getPiece(0,1) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,2) != "O") and (state.getPiece(2,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,1) != "O") and (state.getPiece(2,0) != "O"):
+                Xsum += 1
+        if state.getPiece(0,2) == "O":
+            if (state.getPiece(0,0) != "X") and (state.getPiece(0,1) != "X"):
+                Osum += 1
+            if (state.getPiece(1,2) != "X") and (state.getPiece(2,2) != "X"):
+                Osum += 1
+            if (state.getPiece(1,1) != "X") and (state.getPiece(2,0) != "X"):
+                Osum += 1
+
+        ## (1,0) ##
+        if state.getPiece(1,0) == "X":
+            if (state.getPiece(0,0) != "O") and (state.getPiece(0,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,1) != "O") and (state.getPiece(1,2) != "O"):
+                Xsum += 1
+        if state.getPiece(1,0) == "O":
+            if (state.getPiece(0,0) != "X") and (state.getPiece(0,2) != "X"):
+                Osum += 1
+            if (state.getPiece(1,1) != "X") and (state.getPiece(1,2) != "X"):
+                Osum += 1
+
+        ## (1,1) ##
+        if state.getPiece(1,1) == "X":
+            if (state.getPiece(1,0) != "O") and (state.getPiece(1,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(0,1) != "O") and (state.getPiece(2,1) != "O"):
+                Xsum += 1
+            if (state.getPiece(0,0) != "O") and (state.getPiece(2,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(2,0) != "O") and (state.getPiece(0,2) != "O"):
+                Xsum += 1
+        if state.getPiece(1,1) == "O":
+            if (state.getPiece(1,0) != "X") and (state.getPiece(1,2) != "X"):
+                Xsum += 1
+            if (state.getPiece(0,1) != "X") and (state.getPiece(2,1) != "X"):
+                Xsum += 1
+            if (state.getPiece(0,0) != "X") and (state.getPiece(2,2) != "X"):
+                Xsum += 1
+            if (state.getPiece(2,0) != "X") and (state.getPiece(0,2) != "X"):
+                Xsum += 1
+
+        ## (1,2) ##
+        if state.getPiece(1,2) == "X":
+            if (state.getPiece(1,0) != "O") and (state.getPiece(1,1) != "O"):
+                Xsum += 1
+            if (state.getPiece(0,2) != "O") and (state.getPiece(2,2) != "O"):
+                Xsum += 1
+        if state.getPiece(1,2) == "O":
+            if (state.getPiece(1,0) != "X") and (state.getPiece(1,1) != "X"):
+                Osum += 1
+            if (state.getPiece(0,2) != "X") and (state.getPiece(2,2) != "X"):
+                Osum += 1
+
+        ## (2,0) ##
+        if state.getPiece(2,0) == "X":
+            if (state.getPiece(0,0) != "O") and (state.getPiece(1,0) != "O"):
+                Xsum += 1
+            if (state.getPiece(2,1) != "O") and (state.getPiece(2,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(1,1) != "O") and (state.getPiece(0,2) != "O"):
+                Xsum += 1
+        if state.getPiece(2,0) == "O":
+            if (state.getPiece(0,0) != "X") and (state.getPiece(1,0) != "X"):
+                Osum += 1
+            if (state.getPiece(2,1) != "X") and (state.getPiece(2,2) != "X"):
+                Osum += 1
+            if (state.getPiece(1,1) != "X") and (state.getPiece(0,2) != "X"):
+                Osum += 1
+
+        ## (2,1) ##
+        if state.getPiece(2,1) == "X":
+            if (state.getPiece(2,0) != "O") and (state.getPiece(2,2) != "O"):
+                Xsum += 1
+            if (state.getPiece(0,1) != "O") and (state.getPiece(1,1) != "O"):
+                Xsum += 1
+        if state.getPiece(2,1) == "O":
+            if (state.getPiece(2,0) != "X") and (state.getPiece(2,2) != "X"):
+                Osum += 1
+            if (state.getPiece(0,1) != "X") and (state.getPiece(1,1) != "X"):
+                Osum += 1
+
+        ## (2,2) ##
+        if state.getPiece(2,2) == "X":
+            if (state.getPiece(0,0) != "O") and (state.getPiece(1,1) != "O"):
+                Xsum += 1
+            if (state.getPiece(2,0) != "O") and (state.getPiece(2,1) != "O"):
+                Xsum += 1
+            if (state.getPiece(0,2) != "O") and (state.getPiece(1,2) != "O"):
+                Xsum += 1
+        if state.getPiece(2,2) == "O":
+            if (state.getPiece(0,0) != "X") and (state.getPiece(1,1) != "X"):
+                Osum += 1
+            if (state.getPiece(2,0) != "X") and (state.getPiece(2,1) != "X"):
+                Osum += 1
+            if (state.getPiece(0,2) != "X") and (state.getPiece(1,2) != "X"):
+                Osum += 1
+
+        difference = 0
+        if player == "MAX":
+            difference = Xsum - Osum
+        if player == "MIN":
+            difference = Osum - Xsum
+        print("difference: ",difference)
+        return difference
+
+#####
+
+    ## if the player is X, we choose this function
+    def maxValueDL(self,state,alpha,beta):
+        global dlmoves
+        global depth
+
+        bestVal = -20
+        bestAction = (0,0)
+
+        # cutoffTest
+        if self.cutoffTest(state,self.depth) == 1 :
+            print("cutoff reached")
+            return self.evalFn(state,"MAX")
+
+#        # terminalTest
+#        status = state.isGameOver()
+#        if status != " ":
+#            ## Return the utility function value
+#            return (self.utility(status),(0,0))
+
+        else:
+            currentActions = state.getSpaces()
+            for action in currentActions:
+
+                dlmoves += 1
+                depth += 1
+                (max,a) = self.minValueDL(self.result(state,action,"X"),alpha,beta)
+
+                ## bestVal = MAX(bestVal,max)  ##
+                if max > bestVal:             ##
+                    bestVal = max              ##
+                    bestAction = action        ##
+                #################################
+
+                ## alpha = MAX(alpha, bestVal) ##
+                if bestVal > alpha:      ##
+                    alpha = bestVal       ##
+                #################################
+
+                if beta <= alpha:
+                    break ## beta cut-off
+    #    print("total moves: ",dlmoves)
+            depth -= 1
+        return (bestVal,bestAction)
+
+#####
+    ## if the player is O, we choose this function
+    def minValueDL(self,state,alpha,beta):
+        global depth
+        global dlmoves
+        bestVal = 20
+        bestAction = (0,0)
+
+        # cutoffTest
+        if self.cutoffTest(state,self.depth):
+            return self.evalFn(state,"MIN")
+
+#        # terminalTest
+#        status = state.isGameOver()
+#        if status != " ":
+#            ## Return the utility function value
+#            return (self.utility(status),(0,0))
+
+        else:
+            currentActions = state.getSpaces()
+            for action in currentActions:
+                depth += 1
+                dlmoves += 1
+                (min,a) = self.maxValueDL(self.result(state,action,"O"),alpha,beta)
+
+                ## bestVal = MIN(bestVal,min) ##
+                if min < bestVal:            ##
+                    bestVal = min             ##
+                    bestAction = action       ##
+                ################################
+
+                ## beta = MIN(beta, bestVal) ##
+                if bestVal < beta:     ##
+                    beta = bestVal      ##
+                ###############################
+
+                if beta <= alpha:
+                    break ## alpha cut-off
+    #    print("total moves: ",dlmoves)
+            depth -= 1
         return (bestVal,bestAction)
 
 
