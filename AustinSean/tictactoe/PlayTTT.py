@@ -3,6 +3,9 @@ __author__ = 'Sean'
 from TicTacToe import *
 from time import time
 from tkinter import *
+import menu
+
+
 
 class TTTgui:
     def __init__(self, depth = 9):
@@ -14,9 +17,6 @@ class TTTgui:
 
     def play(self):
         print("Setting up game...\n")
-        alpha = -1
-        beta = 1
-
         self.game = TicTacToe()
         self.player2 = AdversarialSearch(self.game.copy(),"O", self.depth)
         window = Tk()
@@ -24,10 +24,8 @@ class TTTgui:
         window.columnconfigure((0,2), weight=1)
         for i in range(0,3):
             for j in range(0,3):
-                print(str(i))
                 b = Button(window, text = "", pady = 2, width = 5, height = 5, command = lambda a=i,b=j,: self.takeTurn(a,b))
                 b.grid(row = i, column = j)
-                print(self.buttons)
                 self.buttons[i][j] = b
 
 
@@ -49,7 +47,6 @@ class TTTgui:
             return
         self.buttons[y][x]["text"] = "X"
 
-        print(self.game)
         if self.game.isGameOver() != " ":
             status = self.game.isGameOver()
 
@@ -65,7 +62,6 @@ class TTTgui:
         self.game.setPiece(x2,y2,"O")
 
         self.buttons[y2][x2]["text"] = "O"
-        print(self.game)
 
         if self.game.isGameOver() != " ":
             status = self.game.isGameOver()
@@ -77,15 +73,15 @@ class TTTgui:
             return
 
 class TTTgame:
-    def __init__(self, none = 0):
-        self.temp = 0
+    def __init__(self, depth = 9):
+        self.depth = depth
 
     def play(self):
         print("Setting up game...\n")
         game = TicTacToe()
 
-        player1 = AdversarialSearch(game.copy(),"X")
-        player2 = AdversarialSearch(game.copy(),"O")
+        player1 = AdversarialSearch(game.copy(),"X", self.depth)
+        player2 = AdversarialSearch(game.copy(),"O", self.depth)
         while game.isGameOver() == " ":
 
             print("Player 1 is deciding\n")
@@ -149,63 +145,47 @@ class TTTABgame:
         else:
             print(status + " WINS")
 
+def runGUI(depth):
+    gui = TTTgui(depth)
+    gui.play()
 
-class TTTDLgame:
-    def __init__(self, depth = 9):
-        self.depth = depth
+def runGame(depth):
+    game = TTTgame(depth)
+    t0 = time()
+    game.play()
+    t1 = time()
+    print("Time elapsed: ",t1-t0)
 
-    def play(self):
-        print("Setting up game...\n")
-        game = TicTacToe()
-
-        player1 = AdversarialSearch(game.copy(),"X", self.depth)
-        player2 = AdversarialSearch(game.copy(),"O", self.depth)
-        while game.isGameOver() == " ":
-
-            print("Player 1 is deciding\n")
-
-            player1.state = game.copy()
-            (t,(x1,y1)) = player1.maxValue(player1.state)
-            game.setPiece(x1,y1,"X")
-
-            print(game)
-            if game.isGameOver() != " ":
-                break
-
-            print("Player 2 is deciding\n")
-
-            player2.state = game.copy()
-            (t,(x2,y2)) = player2.minValue(player2.state)
-            game.setPiece(x2,y2,"O")
-            print(game)
-
-        status = game.isGameOver()
-
-        if status == "TIE":
-            print("TIE GAME")
-        else:
-            print(status + " WINS")
-
-g = TTTgame()
-h = TTTABgame()
-i = TTTDLgame(2)
-p = TTTgui()
+def runABGame(depth):
+    game = TTTABgame(depth)
+    t0 = time()
+    game.play()
+    t1 = time()
+    print("Time elapsed: ",t1-t0)
 
 
-p.play()
+depth = dict()
+title = menu.TextDisplay("Enter the number of the choice to choose it. Enter 'quit' to quit.")
+gameChoice = menu.ChoicePrompt("Which game do you want to run?",
+                               ["Player vs Adversarial Search", "Adv. Search vs Adv. Search", "AlphaBeta Search vs AlphaBeta Search"])
+depthInput = menu.InputPrompt("How deep should the AI search?", int, depth, "depth", lambda x: x >= 0 and x <= 9)
+guiRun = menu.FunctionRun(runGUI, depth)
+gameRun = menu.FunctionRun(runGame, depth)
+ABRun = menu.FunctionRun(runABGame, depth)
 
-t0 = time()
-#g.play()
-t1 = time()
+titleNode = menu.menuNode(title, [], None)
+root = menu.menuNode(gameChoice, [], None)
+guiDepth = menu.menuNode(depthInput, [], root)
+gameDepth = menu.menuNode(depthInput, [], root)
+ABDepth = menu.menuNode(depthInput, [], root)
+guiNode = menu.menuNode(guiRun, [], root)
+gameNode = menu.menuNode(gameRun, [], root)
+ABNode = menu.menuNode(ABRun, [], root)
 
-t2 = time()
-#h.play()
-t3 = time()
+titleNode.setChildren([root])
+root.setChildren([guiDepth, gameDepth, ABDepth])
+guiDepth.setChildren([guiNode])
+gameDepth.setChildren([gameNode])
+ABDepth.setChildren([ABNode])
 
-t4 = time()
-#i.play()
-t5 = time()
-
-print("reg elapsed: ",t1-t0)
-print("AB elapsed: ",t3-t2)
-print("DL elapsed: ",t5-t4)
+titleNode.execute()
