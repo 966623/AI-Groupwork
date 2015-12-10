@@ -185,7 +185,7 @@ gameChoice = menu.ChoicePrompt("Which game do you want to run?",
 depthInput = menu.InputPrompt("How deep should the AI search?", int, depth, "depth", lambda x: x >= 0 and x <= 9)
 guiRun = menu.FunctionRun(runGUI, depth)
 gameRun = menu.FunctionRun(runGame, depth)
-ABRun = menu.FunctionRun(runABGame, depth)
+ABRun = menu.FunctionRun(runABGame, None)
 
 titleNode = menu.menuNode(title, [], None)
 root = menu.menuNode(gameChoice, [], None)
