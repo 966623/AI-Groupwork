@@ -3,7 +3,7 @@ PROJECT 3 WRITE UP ||
 
 Authors:                    IDs
 	Austin J Kostreba  |  4560108
-	Sean Lin           |  
+	Sean Lin           |  4492832
 	
 	
 In this lab we implemented Adversarial Search in Tic Tac Toe.
