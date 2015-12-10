@@ -1,0 +1,97 @@
+PROJECT 3 WRITE UP ||
+=====================
+
+Authors:                    IDs
+	Austin J Kostreba  |  4560108
+	Sean Lin           |  
+	
+	
+In this lab we implemented Adversarial Search in Tic Tac Toe.
+Specifically, we:
+    - Created a basic Adversarial Search for two AI opponents, both using optimal search 
+	- Created an alpha-beta pruning method for this adversarial search
+	- Compared the time spent solving the two previous methods, as well as the number of nodes traversed in each
+	- Created a depth-limiting function for the normal adversarial search
+	- Created a GUI that allows players to play against an AI
+	
+	
+----------
+	
+	
+COMPARISON OF ADVERSARIAL SEARCH AND ALPHA-BETA PRUNING SEARCH
+
+	As is expected, alpha-beta pruning is much more efficient than a standard minimax adversarial search.
+	alpha-beta, at worst, needs to examine O(b^(m/2)) nodes, whereas standard adversarial search needs to examine O(b^m) nodes.
+	Also, for our standard search, to pick the first place to place a piece, X must go through every single possibility in the tree, making
+	the first move take very long. This is reflected in the runtime as well.
+	
+	Below is the raw data comparing these two methods:
+	
+	TIME
+	|-----------------------------------|
+	|////////| Adversarial | Alpha-Beta |
+	|-----------------------------------|
+	| Trial1 | 10.721613s  | 0.3940227s |
+	| Trial2 | 10.765616s  | 0.3930223s |
+	| Trial3 | 10.592606s  | 0.3870226s |
+	|--------|-------------|------------|
+	
+	NUMBER OF MOVES
+	|--------|-------------|------------|
+	|////////| Adversarial | Alpha-Beta |
+	|-----------------------------------|
+	| moves  | 619805      | 22112      |
+	|-----------------------------------|
+	
+	
+----------
+	
+	
+COMPARISON OF ADVERSARIAL SEARCH WITH AND WITHOUT DEPTH LIMITING	
+	
+	By running the adversarial search with and without depth limiting, a few interesting things appeared.
+	Below is each depth limit value, and who wins:
+	
+	|----------------|
+	| Depth | Winner |
+	|----------------|
+	|   1   |   X    |
+	|   2   |   X    |
+	|   3   |   X    |
+	|   4   |  TIE   |
+	|   5   |   X    |
+	|   6   |  TIE   |
+	|   7   |  TIE   |
+	|   8   |  TIE   |
+	|   9   |  TIE   |
+	|----------------|
+	
+	Note that each tie from depth 6 on yields the same value.
+	Depth = 4 is an outlier, and although presents a tie, is not the same tie as depths 6-9.
+	The TIEs present in depths 6-9 is the same result of the normal adversarial search.
+	
+	From this we can say that for tic tac toe, a depth of 6 will yield in the same result as the normal search.
+	
+
+----------
+
+
+PLAYING AGAINST THE AI
+
+	We learned some interesting things when playing against the AI. 
+	When the depth limit is set to a value lower than 6, the AI begins to not handle when the player has 2 of 3 pieces placed in a row.
+	In other words, when the limit is 1-5, the AI doesn't detect when a player can win the next turn. However, it plays optimally for depth >= 6.
+	
+	Also, the AI assumes that you will behave optimally, and if not, it doesn't always choose to block you because it doesn't consider that move.
+	
+	
+----------
+
+
+LOOKING AHEAD
+
+	If given more time, we would have liked to implement depth-limiting for alpha-beta pruning as well, and see if the limiting results in the same states,
+	which it should. We would also like to make an even more user-friendly interface, and add more functionality, such as trying to find an optimal move ordering
+	and seeing if that would affect alpha-beta pruning at all for tic tac toe, or trying different evaluation functions while depth limiting. Another option would
+	be to add forward pruning as well, although this might not be as useful for a simple game such as tic tac toe.
+	
