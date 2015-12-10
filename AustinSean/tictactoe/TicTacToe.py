@@ -7,7 +7,7 @@ depth = 0
 
 class AdversarialSearch:
     # Initialize
-    def __init__(self, state=None, player="X"):
+    def __init__(self, state=None, player="X", depth = 9):
 
         # State keeps the board, which is a TicTacToe class
         self.state = TicTacToe(state)
@@ -17,6 +17,9 @@ class AdversarialSearch:
         self.actions = self.state.getSpaces()
         self.player = player  ## The current player at this state (assumed that X goes first)
         # self.terminalTest = terminalTest
+
+        self.depth = depth
+        self.currentDepth = 0;
 
 #####
 
@@ -39,31 +42,38 @@ class AdversarialSearch:
 
     ## if the player is X, we choose this function
     def maxValue(self,state):
-        global moves
-        bestVal = -1
+        bestVal = -2
         bestAction = (0,0)
         # terminalTest
         status = state.isGameOver()
         if status != " ":
             ## Return the utility function value
-
             return (self.utility(status),(0,0))
         else:
+            self.currentDepth += 1
             currentActions = state.getSpaces()
+            print("\nX DEPTH: " + str(self.currentDepth))
             for action in currentActions:
-                moves += 1
-                (max,a) = self.minValue(self.result(state,action,"X"))
+
+                print("X TRYING: " + str(action))
+                if self.currentDepth > self.depth:
+                    (max,a) = (0,action)
+                else:
+                    (max,a) = self.minValue(self.result(state,action,"X"))
+                print("X VALUE: " + str(max) + ", " + str(action))
                 if max > bestVal:
                     bestVal = max
                     bestAction = action
+                print("X BEST: " + str(bestVal) + ", " + str(bestAction))
     #    print("total moves: ",moves)
+        self.currentDepth -= 1
+        print("RETURN TO DEPTH" + str(self.currentDepth) + "\n")
         return (bestVal,bestAction)
 
 #####
     ## if the player is O, we choose this function
     def minValue(self,state):
-        global moves
-        bestVal = 1
+        bestVal = 2
         bestAction = (0,0)
         # terminalTest
         status = state.isGameOver()
@@ -71,14 +81,25 @@ class AdversarialSearch:
             ## Return the utility function value
             return (self.utility(status),(0,0))
         else:
+            self.currentDepth += 1
             currentActions = state.getSpaces()
+            print("\nO DEPTH: " + str(self.currentDepth))
             for action in currentActions:
-                moves += 1
-                (min,a) = self.maxValue(self.result(state,action,"O"))
+
+                print("O TRYING: " + str(action))
+                if self.currentDepth > self.depth:
+                    (min,a) = (0,action)
+                else:
+                    (min,a) = self.maxValue(self.result(state,action,"O"))
+                print("O VALUE: " + str(min) + ", " + str(action))
                 if min < bestVal:
                     bestVal = min
                     bestAction = action
+                print("O BEST: " + str(bestVal) + ", " + str(bestAction))
+
     #    print("total moves: ",moves)
+        self.currentDepth -=1
+        print("RETURN TO DEPTH" + str(self.currentDepth) + "\n")
         return (bestVal,bestAction)
 
 

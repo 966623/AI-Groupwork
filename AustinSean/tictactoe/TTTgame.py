@@ -5,11 +5,12 @@ from time import time
 from tkinter import *
 
 class TTTgui:
-    def __init__(self):
+    def __init__(self, depth = 9):
         self.temp = 0
         self.game = None
         self.player2 = None
         self.buttons = [[None for i in range(0,3)] for j in range(0,3)]
+        self.depth = depth
 
     def play(self):
         print("Setting up game...\n")
@@ -17,7 +18,7 @@ class TTTgui:
         beta = 1
 
         self.game = TicTacToe()
-        self.player2 = AdversarialSearch(self.game.copy(),"O")
+        self.player2 = AdversarialSearch(self.game.copy(),"O", self.depth)
         window = Tk()
         window.rowconfigure((0,3), weight=1)
         window.columnconfigure((0,2), weight=1)
@@ -38,7 +39,7 @@ class TTTgui:
         self.game = TicTacToe()
         alpha = -1
         beta = 1
-        self.player2 = AdversarialSearch(self.game.copy(),"O")
+        self.player2 = AdversarialSearch(self.game.copy(),"O", self.depth)
         for i in range(0,3):
             for j in range(0,3):
                 self.buttons[i][j]["text"] = ""
@@ -150,23 +151,21 @@ class TTTABgame:
 
 
 class TTTDLgame:
-    def __init__(self, none = 0):
-        self.temp = 0
+    def __init__(self, depth = 9):
+        self.depth = depth
 
     def play(self):
         print("Setting up game...\n")
         game = TicTacToe()
-        alpha = -20
-        beta = 20
-        depth = 0
-        player1 = DepthLimitedSearch(game.copy(),"X",alpha,beta,depth)
-        player2 = DepthLimitedSearch(game.copy(),"O",alpha,beta,depth)
+
+        player1 = AdversarialSearch(game.copy(),"X", self.depth)
+        player2 = AdversarialSearch(game.copy(),"O", self.depth)
         while game.isGameOver() == " ":
 
             print("Player 1 is deciding\n")
 
             player1.state = game.copy()
-            (t,(x1,y1)) = player1.maxValueDL(player1.state,alpha,beta)
+            (t,(x1,y1)) = player1.maxValue(player1.state)
             game.setPiece(x1,y1,"X")
 
             print(game)
@@ -176,7 +175,7 @@ class TTTDLgame:
             print("Player 2 is deciding\n")
 
             player2.state = game.copy()
-            (t,(x2,y2)) = player2.minValueDL(player2.state,alpha,beta)
+            (t,(x2,y2)) = player2.minValue(player2.state)
             game.setPiece(x2,y2,"O")
             print(game)
 
@@ -190,7 +189,7 @@ class TTTDLgame:
 g = TTTgame()
 h = TTTABgame()
 i = TTTDLgame()
-p = TTTgui()
+p = TTTgui(5)
 
 
 p.play()
