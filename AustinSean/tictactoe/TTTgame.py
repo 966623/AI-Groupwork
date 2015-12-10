@@ -2,6 +2,79 @@ __author__ = 'Sean'
 
 from TicTacToe import *
 from time import time
+from tkinter import *
+
+class TTTgui:
+    def __init__(self):
+        self.temp = 0
+        self.game = None
+        self.player2 = None
+        self.buttons = [[None for i in range(0,3)] for j in range(0,3)]
+
+    def play(self):
+        print("Setting up game...\n")
+        alpha = -1
+        beta = 1
+
+        self.game = TicTacToe()
+        self.player2 = AdversarialSearch(self.game.copy(),"O")
+        window = Tk()
+        window.rowconfigure((0,3), weight=1)
+        window.columnconfigure((0,2), weight=1)
+        for i in range(0,3):
+            for j in range(0,3):
+                print(str(i))
+                b = Button(window, text = "", pady = 2, width = 5, height = 5, command = lambda a=i,b=j,: self.takeTurn(a,b))
+                b.grid(row = i, column = j)
+                print(self.buttons)
+                self.buttons[i][j] = b
+
+
+        buttonR = Button(window, text = "RESET", width = 15, height = 5, command =self.reset)
+        buttonR.grid(row = 3, column = 0, columnspan = 3)
+        window.mainloop()
+
+    def reset(self):
+        self.game = TicTacToe()
+        alpha = -1
+        beta = 1
+        self.player2 = AdversarialSearch(self.game.copy(),"O")
+        for i in range(0,3):
+            for j in range(0,3):
+                self.buttons[i][j]["text"] = ""
+
+    def takeTurn(self, y, x):
+        if self.game.setPiece(x,y,"X") == -1:
+            return
+        self.buttons[y][x]["text"] = "X"
+
+        print(self.game)
+        if self.game.isGameOver() != " ":
+            status = self.game.isGameOver()
+
+            if status == "TIE":
+                print("TIE GAME")
+            else:
+                print(status + " WINS")
+            return
+
+
+        self.player2.state = self.game.copy()
+        (t,(x2,y2)) = self.player2.minValue(self.player2.state)
+        self.game.setPiece(x2,y2,"O")
+
+        self.buttons[y2][x2]["text"] = "O"
+        print(self.game)
+
+        if self.game.isGameOver() != " ":
+            status = self.game.isGameOver()
+
+            if status == "TIE":
+                print("TIE GAME")
+            else:
+                print(status + " WINS")
+            return
+
 class TTTgame:
     def __init__(self, none = 0):
         self.temp = 0
@@ -86,8 +159,8 @@ class TTTDLgame:
         alpha = -20
         beta = 20
         depth = 0
-        player1 = DepthLimitedSearch(game.copy(),"X",alpha,beta,0)
-        player2 = DepthLimitedSearch(game.copy(),"O",alpha,beta,0)
+        player1 = DepthLimitedSearch(game.copy(),"X",alpha,beta,depth)
+        player2 = DepthLimitedSearch(game.copy(),"O",alpha,beta,depth)
         while game.isGameOver() == " ":
 
             print("Player 1 is deciding\n")
@@ -114,20 +187,24 @@ class TTTDLgame:
         else:
             print(status + " WINS")
 
-g = TTTgame
-h = TTTABgame
-i = TTTDLgame
+g = TTTgame()
+h = TTTABgame()
+i = TTTDLgame()
+p = TTTgui()
+
+
+p.play()
 
 t0 = time()
-g.play(g)
+#g.play()
 t1 = time()
 
 t2 = time()
-h.play(h)
+#h.play()
 t3 = time()
 
 t4 = time()
-#i.play(i)
+#i.play()
 t5 = time()
 
 print("reg elapsed: ",t1-t0)
